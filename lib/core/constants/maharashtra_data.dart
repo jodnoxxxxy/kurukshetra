@@ -1,0 +1,48 @@
+class MaharashtraData {
+  static const List<String> districts = [
+    'Ahmednagar', 'Akola', 'Amravati', 'Chhatrapati Sambhajinagar', 'Beed', 'Bhandara', 'Buldhana',
+    'Chandrapur', 'Dhule', 'Gadchiroli', 'Gondia', 'Hingoli', 'Jalgaon', 'Jalna', 'Kolhapur',
+    'Latur', 'Mumbai City', 'Mumbai Suburban', 'Nagpur', 'Nanded', 'Nandurbar', 'Nashik',
+    'Dharashiv', 'Palghar', 'Parbhani', 'Pune', 'Raigad', 'Ratnagiri', 'Sangli', 'Satara',
+    'Sindhudurg', 'Solapur', 'Thane', 'Wardha', 'Washim', 'Yavatmal'
+  ];
+
+  static const Map<String, List<String>> talukas = {
+    'Ahmednagar': ['Akole', 'Jamkhed', 'Karjat', 'Kopargaon', 'Nagar', 'Nevasa', 'Parner', 'Pathardi', 'Rahata', 'Rahuri', 'Sangamner', 'Shevgaon', 'Shrigonda', 'Shrirampur'],
+    'Akola': ['Akola', 'Akot', 'Balapur', 'Barshitakli', 'Murtijapur', 'Patur', 'Telhara'],
+    'Amravati': ['Achalpur', 'Amravati', 'Anjangaon Surji', 'Bhatkuli', 'Chandur Bazar', 'Chandur Railway', 'Chikhaldara', 'Daryapur', 'Dhamangaon Railway', 'Dharni', 'Morshi', 'Nandgaon-Khandeshwar', 'Teosa', 'Warud'],
+    'Chhatrapati Sambhajinagar': ['Aurangabad', 'Chhatrapati Sambhajinagar', 'Gangapur', 'Kannad', 'Khultabad', 'Paithan', 'Phulambri', 'Sillod', 'Soygaon', 'Vaijapur'],
+    'Beed': ['Ambejogai', 'Ashti', 'Beed', 'Dharur', 'Georai', 'Kaj', 'Majalgaon', 'Parli', 'Patoda', 'Shirur', 'Wadwani'],
+    'Bhandara': ['Bhandara', 'Mohadi', 'Pauni', 'Tumsar', 'Lakhani', 'Sakoli', 'Lakhandur'],
+    'Buldhana': ['Buldhana', 'Chikhli', 'Deulgaon Raja', 'Jalgaon (Jamod)', 'Khamgaon', 'Lonar', 'Malkapur', 'Mehkar', 'Motala', 'Nandura', 'Sangrampur', 'Shegaon', 'Sindkhed Raja'],
+    'Chandrapur': ['Ballarpur', 'Bhadravati', 'Brahmapuri', 'Chandrapur', 'Chimur', 'Gondpipri', 'Jivati', 'Korpana', 'Mul', 'Nagbhid', 'Pombhurna', 'Rajura', 'Sawali', 'Sindewahi', 'Warora'],
+    'Dhule': ['Dhule', 'Sakri', 'Shirpur', 'Sindkheda'],
+    'Gadchiroli': ['Aheri', 'Armori', 'Bhamragad', 'Chamorshi', 'Desaiganj (Vadasa)', 'Dhanora', 'Etapalli', 'Gadchiroli', 'Korchi', 'Kurkheda', 'Mulchera', 'Sironcha'],
+    'Gondia': ['Amgaon', 'Arjuni Morgaon', 'Deori', 'Gondia', 'Goregaon', 'Sadak Arjuni', 'Salekasa', 'Tirora'],
+    'Hingoli': ['Aundha (Nagnath)', 'Basmath', 'Hingoli', 'Kalamnuri', 'Sengaon'],
+    'Jalgaon': ['Amalner', 'Bhadgaon', 'Bhusawal', 'Bodwad', 'Chalisgaon', 'Chopda', 'Dharangaon', 'Erandol', 'Jalgaon', 'Jamner', 'Muktainagar', 'Pachora', 'Parola', 'Raver', 'Yawal'],
+    'Jalna': ['Ambad', 'Badnapur', 'Bhokardan', 'Ghansawangi', 'Jalna', 'Jafrabad', 'Mantha', 'Partur'],
+    'Kolhapur': ['Ajara', 'Bavda', 'Bhudargad', 'Chandgad', 'Gadhinglaj', 'Hatkanangle', 'Kagal', 'Karvir', 'Panhala', 'Radhanagari', 'Shahuwadi', 'Shirol'],
+    'Latur': ['Ahmadpur', 'Ausa', 'Chakur', 'Deoni', 'Jalkot', 'Latur', 'Nilanga', 'Renapur', 'Shirur Anantpal', 'Udgir'],
+    'Mumbai City': ['Mumbai City'],
+    'Mumbai Suburban': ['Andheri', 'Borivali', 'Kurla'],
+    'Nagpur': ['Bhiwapur', 'Hingna', 'Kalameshwar', 'Kamptee', 'Katol', 'Kuhi', 'Nagpur (Rural)', 'Nagpur (Urban)', 'Narkhed', 'Parseoni', 'Ramtek', 'Savner', 'Umred'],
+    'Nanded': ['Ardhapur', 'Bhokar', 'Biloli', 'Deglur', 'Dharmabad', 'Hadgaon', 'Himayatnagar', 'Kandhar', 'Kinwat', 'Loha', 'Mahur', 'Mudkhed', 'Mukhed', 'Naigaon (Khairgaon)', 'Nanded', 'Umri'],
+    'Nandurbar': ['Akkalkuwa', 'Akrani', 'Nandurbar', 'Navapur', 'Shahada', 'Talode'],
+    'Nashik': ['Baglan', 'Chandvad', 'Deola', 'Dindori', 'Igatpuri', 'Kalwan', 'Malegaon', 'Nandgaon', 'Nashik', 'Niphad', 'Peint', 'Sinnar', 'Surgana', 'Trimbakeshwar', 'Yevala'],
+    'Dharashiv': ['Bhum', 'Kalamb', 'Lohara', 'Omerga', 'Dharashiv', 'Osmanabad', 'Paranda', 'Tuljapur', 'Washi'],
+    'Palghar': ['Dahanu', 'Jawhar', 'Mokhada', 'Palghar', 'Palghar', 'Talasari', 'Vasai', 'Vikramgad'],
+    'Parbhani': ['Gangakhed', 'Jintur', 'Manwath', 'Palam', 'Parbhani', 'Pathri', 'Purna', 'Sailu', 'Sonpeth'],
+    'Pune': ['Ambegaon', 'Baramati', 'Bhor', 'Daund', 'Haveli', 'Indapur', 'Junnar', 'Khed', 'Maval', 'Mulshi', 'Pune City', 'Purandhar', 'Shirur', 'Velhe'],
+    'Raigad': ['Alibag', 'Karjat', 'Khalapur', 'Mahad', 'Mangaon', 'Mhasla', 'Murud', 'Panvel', 'Pen', 'Poladpur', 'Roha', 'Shrivardhan', 'Sudhagad', 'Tala', 'Uran'],
+    'Ratnagiri': ['Chiplun', 'Dapoli', 'Guhagar', 'Khed', 'Lanja', 'Mandangad', 'Rajapur', 'Ratnagiri', 'Sangameshwar'],
+    'Sangli': ['Atpadi', 'Jat', 'Kadegaon', 'Kavathemahankal', 'Khanapur', 'Miraj', 'Palus', 'Shirala', 'Tasgaon', 'Walwa'],
+    'Satara': ['Jaoli', 'Karad', 'Khandala', 'Khatav', 'Koregaon', 'Mahabaleshwar', 'Man', 'Patan', 'Phaltan', 'Satara', 'Wai'],
+    'Sindhudurg': ['Devgad', 'Dodamarg', 'Kankavli', 'Kudal', 'Malwan', 'Sawantwadi', 'Vaibhavvadi', 'Vengurla'],
+    'Solapur': ['Akkalkot', 'Barshi', 'Karmala', 'Madha', 'Malshiras', 'Mangalvedhe', 'Mohol', 'Pandharpur', 'Sangole', 'Solapur North', 'Solapur South'],
+    'Thane': ['Ambarnath', 'Bhiwandi', 'Kalyan', 'Murbad', 'Shahapur', 'Thane', 'Ulhasnagar'],
+    'Wardha': ['Arvi', 'Ashti', 'Deoli', 'Hinganghat', 'Karanja', 'Samudrapur', 'Seloo', 'Wardha'],
+    'Washim': ['Karanja', 'Malegaon', 'Mangrulpir', 'Manora', 'Risod', 'Washim'],
+    'Yavatmal': ['Arni', 'Babulgaon', 'Darwha', 'Digras', 'Ghatanji', 'Kalamb', 'Kelapur', 'Mahagaon', 'Maregaon', 'Ner', 'Pusad', 'Ralegaon', 'Umarkhed', 'Wani', 'Yavatmal', 'Zari-Jamani'],
+  };
+}

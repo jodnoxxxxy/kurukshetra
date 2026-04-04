@@ -1,4 +1,6 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:kurukshetra/features/home/models/crop.dart';
 
 abstract class CropRepository {
@@ -12,25 +14,47 @@ abstract class CropRepository {
 }
 
 class CropRepositoryImpl implements CropRepository {
-  // Reference to the 'crops' collection in Firestore
-  final CollectionReference _cropsCollection = 
-      FirebaseFirestore.instance.collection('crops');
+  final String _baseUrl = 'http://localhost:5000/api/v1/farmers';
 
   @override
   Future<List<Crop>> getCrops() async {
     try {
-      final QuerySnapshot snapshot = await _cropsCollection.get();
-      
-      return snapshot.docs.map((doc) {
-        // Convert Firestore document back to Crop model
-        final data = doc.data() as Map<String, dynamic>;
-        // Use Firestore's document ID to uniquely track items
-        data['id'] = doc.id; 
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('auth_token');
+
+      if (token == null || token == 'demo_farmer') return [];
+
+      final response = await http.get(
+        Uri.parse('$_baseUrl/farms'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      ).timeout(const Duration(seconds: 10));
+
+      if (response.statusCode == 200) {
+        final List<dynamic> farms = jsonDecode(response.body)['data']['farms'];
+        final List<Crop> allCrops = [];
         
-        return Crop.fromJson(data);
-      }).toList();
+        for (var farm in farms) {
+          final List<dynamic> crops = farm['crops'] ?? [];
+          for (var cropData in crops) {
+            allCrops.add(Crop(
+              id: cropData['id'],
+              name: cropData['cropName'],
+              icon: '🌾', // Default icon for backend crops
+              sowingDate: DateTime.tryParse(cropData['plantingDate'] ?? '') ?? DateTime.now(),
+              expectedHarvestDate: DateTime.tryParse(cropData['expectedHarvest'] ?? '') ?? DateTime.now(),
+              status: cropData['status'] ?? 'growing',
+              area: double.tryParse(farm['areaAcres']?.toString() ?? '1.0') ?? 1.0,
+            ));
+          }
+        }
+        return allCrops;
+      }
+      return [];
     } catch (e) {
-      print("Error fetching crops: \$e");
+      print("Error fetching crops: $e");
       return [];
     }
   }
@@ -38,31 +62,88 @@ class CropRepositoryImpl implements CropRepository {
   @override
   Future<void> addCrop(Crop crop) async {
     try {
-      // Add crop specifically using its JSON map.
-      // Firebase automatically creates the ID for it.
-      await _cropsCollection.add(crop.toJson());
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('auth_token');
+      if (token == null || token == 'demo_farmer') return;
+
+      final response = await http.post(
+        Uri.parse('$_baseUrl/farms/default/crops'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'cropName': crop.name,
+          'plantingDate': crop.sowingDate.toIso8601String(),
+          'expectedHarvest': crop.expectedHarvestDate?.toIso8601String(),
+          'areaPlanted': crop.area,
+          'status': crop.status,
+        }),
+      ).timeout(const Duration(seconds: 10));
+
+      if (response.statusCode != 201) {
+        throw Exception('Failed to add crop: ${response.statusCode}');
+      }
+      print('Crop added successfully to backend');
     } catch (e) {
-      print("Error adding crop: \$e");
+      print("Error adding crop: $e");
+      throw e;
     }
   }
 
   @override
   Future<void> updateCrop(Crop crop) async {
     try {
-      // Update specific Document ID fields
-      await _cropsCollection.doc(crop.id).update(crop.toJson());
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('auth_token');
+      if (token == null || token == 'demo_farmer') return;
+
+      final response = await http.put(
+        Uri.parse('$_baseUrl/crops/${crop.id}'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'cropName': crop.name,
+          'plantingDate': crop.sowingDate.toIso8601String(),
+          'areaPlanted': crop.area,
+          'status': crop.status,
+        }),
+      ).timeout(const Duration(seconds: 10));
+
+      if (response.statusCode != 200) {
+        throw Exception('Failed to update crop: ${response.statusCode}');
+      }
+      print('Crop updated successfully on backend');
     } catch (e) {
-      print("Error updating crop: \$e");
+      print("Error updating crop: $e");
+      throw e;
     }
   }
 
   @override
   Future<void> deleteCrop(String cropId) async {
     try {
-      // Delete the entire document
-      await _cropsCollection.doc(cropId).delete();
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('auth_token');
+      if (token == null || token == 'demo_farmer') return;
+
+      final response = await http.delete(
+        Uri.parse('$_baseUrl/crops/$cropId'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      ).timeout(const Duration(seconds: 10));
+
+      if (response.statusCode != 200) {
+        throw Exception('Failed to delete crop: ${response.statusCode}');
+      }
+      print('Crop deleted successfully from backend');
     } catch (e) {
-      print("Error deleting crop: \$e");
+      print("Error deleting crop: $e");
+      throw e;
     }
   }
 
@@ -196,8 +277,28 @@ class CropRepositoryImpl implements CropRepository {
 
   @override
   Future<List<MarketPrice>> getMarketPrices() async {
-    await Future.delayed(const Duration(milliseconds: 400));
-    
+    try {
+      final response = await http.get(
+        Uri.parse('http://localhost:5000/api/v1/market/prices'),
+      ).timeout(const Duration(seconds: 10));
+
+      if (response.statusCode == 200) {
+        final List<dynamic> prices = jsonDecode(response.body)['data']['prices'];
+        if (prices.isNotEmpty) {
+          return prices.map((m) => MarketPrice(
+            cropName: m['cropName'],
+            pricePerQuintal: (m['pricePerQuintal'] ?? 0.0).toDouble(),
+            trend: m['trend'] ?? 'stable',
+            market: m['mandiName'],
+            lastUpdated: DateTime.tryParse(m['priceDate'] ?? '') ?? DateTime.now(),
+          )).toList();
+        }
+      }
+    } catch (e) {
+      print('Error fetching market prices: $e');
+    }
+
+    // Default mock data if backend empty or fails
     return [
       MarketPrice(
         cropName: 'Wheat',
@@ -226,48 +327,6 @@ class CropRepositoryImpl implements CropRepository {
         trend: 'down',
         market: 'Akola',
         lastUpdated: DateTime.now().subtract(const Duration(hours: 4)),
-      ),
-      MarketPrice(
-        cropName: 'Sugarcane',
-        pricePerQuintal: 350.0,
-        trend: 'stable',
-        market: 'Kolhapur',
-        lastUpdated: DateTime.now().subtract(const Duration(hours: 2)),
-      ),
-      MarketPrice(
-        cropName: 'Maize',
-        pricePerQuintal: 1950.0,
-        trend: 'up',
-        market: 'Nashik',
-        lastUpdated: DateTime.now().subtract(const Duration(hours: 3)),
-      ),
-      MarketPrice(
-        cropName: 'Ragi',
-        pricePerQuintal: 3800.0,
-        trend: 'stable',
-        market: 'Bangalore',
-        lastUpdated: DateTime.now().subtract(const Duration(hours: 5)),
-      ),
-      MarketPrice(
-        cropName: 'Bajra',
-        pricePerQuintal: 2200.0,
-        trend: 'down',
-        market: 'Jaipur',
-        lastUpdated: DateTime.now().subtract(const Duration(hours: 2)),
-      ),
-      MarketPrice(
-        cropName: 'Jowar',
-        pricePerQuintal: 2600.0,
-        trend: 'up',
-        market: 'Hyderabad',
-        lastUpdated: DateTime.now().subtract(const Duration(hours: 4)),
-      ),
-      MarketPrice(
-        cropName: 'Pulses',
-        pricePerQuintal: 5500.0,
-        trend: 'stable',
-        market: 'Delhi',
-        lastUpdated: DateTime.now().subtract(const Duration(hours: 3)),
       ),
     ];
   }

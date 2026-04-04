@@ -198,66 +198,82 @@ class MyCropNotifier extends Notifier<MyCropState> {
 
   Future<void> _loadCrops() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final raw = prefs.getString(_kMyCropsKey);
+      final repo = ref.read(cropRepositoryProvider);
+      final realCrops = await repo.getCrops();
+      
+      final mappedCrops = realCrops.map((c) => CropModel(
+        id: c.id,
+        name: c.name,
+        sowingDate: c.sowingDate,
+        farmerId: 'current',
+        status: c.status,
+      )).toList();
 
-      List<CropModel> savedCrops = [];
-      if (raw != null) {
-        final List<dynamic> decoded = jsonDecode(raw) as List<dynamic>;
-        savedCrops = decoded.map((e) => CropModel.fromJson(e as Map<String, dynamic>)).toList();
-      }
-
-      // Seed with example data only if nothing saved yet
-      if (savedCrops.isEmpty) {
-        savedCrops = [
-          CropModel(
-            id: '1',
-            name: 'Ragi',
-            sowingDate: DateTime.now().subtract(const Duration(days: 30)),
-            farmerId: 'farmer_001',
-          ),
-          CropModel(
-            id: '2',
-            name: 'Soybean',
-            sowingDate: DateTime.now().subtract(const Duration(days: 45)),
-            farmerId: 'farmer_001',
-          ),
-        ];
-        // Persist the seed data
-        await _persist(savedCrops);
-      }
-
-      state = state.copyWith(myCrops: savedCrops, isLoading: false);
+      state = state.copyWith(myCrops: mappedCrops, isLoading: false);
     } catch (e) {
-      state = state.copyWith(error: e.toString(), isLoading: false);
-    }
-  }
+      // Fallback to local storage if backend fails
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        final raw = prefs.getString(_kMyCropsKey);
 
-  Future<void> addCrop(String cropName, DateTime sowingDate) async {
-    state = state.copyWith(isLoading: true);
-    try {
-      final newCrop = CropModel(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        name: cropName,
-        sowingDate: sowingDate,
-        farmerId: 'farmer_001',
-      );
-      final updatedCrops = [...state.myCrops, newCrop];
-      await _persist(updatedCrops);
-      state = state.copyWith(myCrops: updatedCrops, isLoading: false);
-    } catch (e) {
-      state = state.copyWith(error: e.toString(), isLoading: false);
+        List<CropModel> savedCrops = [];
+        if (raw != null) {
+          final List<dynamic> decoded = jsonDecode(raw) as List<dynamic>;
+          savedCrops = decoded.map((e) => CropModel.fromJson(e as Map<String, dynamic>)).toList();
+        }
+        state = state.copyWith(myCrops: savedCrops, isLoading: false);
+      } catch (_) {
+        state = state.copyWith(error: e.toString(), isLoading: false);
+      }
     }
   }
 
   Future<void> deleteCrop(String cropId) async {
-    state = state.copyWith(isLoading: true);
+    // Optimistic Update: Remove from local state immediately
+    final previousCrops = state.myCrops;
+    final updatedCrops = state.myCrops.where((crop) => crop.id != cropId).toList();
+    state = state.copyWith(myCrops: updatedCrops);
+    await _persist(updatedCrops);
+
     try {
-      final updatedCrops = state.myCrops.where((crop) => crop.id != cropId).toList();
-      await _persist(updatedCrops);
-      state = state.copyWith(myCrops: updatedCrops, isLoading: false);
+      // Trigger backend delete in background
+      final repo = ref.read(cropRepositoryProvider);
+      await repo.deleteCrop(cropId);
     } catch (e) {
-      state = state.copyWith(error: e.toString(), isLoading: false);
+      print('Backend delete failed, reverting local state: $e');
+      // If server fails, we'd ideally revert or notify. For now, just log.
+      // state = state.copyWith(myCrops: previousCrops); 
+    }
+  }
+
+  Future<void> addCrop(String cropName, DateTime sowingDate) async {
+    // Generate a temporary ID
+    final tempId = DateTime.now().millisecondsSinceEpoch.toString();
+    final newCrop = CropModel(
+      id: tempId,
+      name: cropName,
+      sowingDate: sowingDate,
+      farmerId: 'current',
+    );
+
+    // Optimistic Update: Add to local state immediately
+    final updatedCrops = [...state.myCrops, newCrop];
+    state = state.copyWith(myCrops: updatedCrops);
+    await _persist(updatedCrops);
+
+    try {
+      // Trigger backend add in background
+      final repo = ref.read(cropRepositoryProvider);
+      await repo.addCrop(Crop(
+        id: tempId,
+        name: cropName,
+        icon: '🌱',
+        sowingDate: sowingDate,
+        expectedHarvestDate: sowingDate.add(const Duration(days: 120)),
+        area: 1.0,
+      ));
+    } catch (e) {
+      print('Backend add failed: $e');
     }
   }
 

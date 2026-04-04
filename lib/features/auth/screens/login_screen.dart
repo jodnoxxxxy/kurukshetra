@@ -6,6 +6,9 @@ import 'package:kurukshetra/core/constants/app_colors.dart';
 import 'package:kurukshetra/features/consumer_auth/providers/consumer_auth_provider.dart';
 import 'package:kurukshetra/l10n/app_localizations.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:kurukshetra/features/auth/providers/auth_provider.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -46,45 +49,81 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         final phone = _idController.text.trim();
         final password = _passwordController.text.trim();
 
+        // Admin/Demo bypass
         if (phone == 'demo' && password == 'demo') {
+          await ref.read(authStateProvider.notifier).login('demo_farmer');
           final prefs = await SharedPreferences.getInstance();
-          await prefs.setString('auth_token', 'demo_farmer');
           await prefs.setString('user_role', 'farmer');
-          if (mounted) {
-            context.go('/');
-          }
+          await prefs.setString('user_name', 'Demo Farmer');
+          if (mounted) context.go('/');
           return;
         }
 
-        final query = await FirebaseFirestore.instance.collection('farmers')
-            .where('phone', isEqualTo: phone)
-            .where('password', isEqualTo: password)
-            .get();
+        // Call backend login API
+        final response = await http.post(
+          Uri.parse('http://localhost:5000/api/v1/auth/login'),
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode({
+            'phone': phone,
+            'password': password,
+          }),
+        ).timeout(
+          const Duration(seconds: 10),
+          onTimeout: () => throw Exception('Connection timeout. Make sure the backend server is running.'),
+        );
 
-        if (query.docs.isEmpty) {
-          throw Exception('Invalid Farmer Phone or Password.');
-        }
-
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('auth_token', query.docs.first.id);
-        await prefs.setString('user_role', 'farmer');
-        if (mounted) {
-          context.go('/');
+        if (response.statusCode == 200) {
+          final responseData = jsonDecode(response.body);
+          final token = responseData['data']['token'];
+          final farmer = responseData['data']['farmer'];
+          
+          await ref.read(authStateProvider.notifier).login(token);
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString('user_id', farmer['id']);
+          await prefs.setString('user_name', farmer['name']);
+          await prefs.setString('user_role', 'farmer');
+          
+          if (mounted) context.go('/');
+        } else {
+          final error = jsonDecode(response.body);
+          throw Exception(error['message'] ?? 'Login failed');
         }
       } else {
         // Consumer Login via existing provider hook
         await ref.read(consumerAuthProvider.notifier).login(_idController.text.trim(), _passwordController.text.trim());
         final consumer = ref.read(consumerAuthProvider);
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('auth_token', consumer?.id ?? 'consumer_token');
-        await prefs.setString('user_role', 'consumer');
-        if (mounted) {
-          context.go('/consumer-dashboard');
+        
+        if (consumer != null) {
+          await ref.read(authStateProvider.notifier).login(consumer.id);
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString('user_role', 'consumer');
+          if (mounted) {
+            context.go('/consumer-dashboard');
+          }
+        } else {
+           throw Exception('Consumer login failed.');
         }
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('${AppLocalizations.of(context)!.loginFailedError}: $e')));
+        String errorMsg = e.toString().contains(':') ? e.toString().split(':').last.trim() : e.toString();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${AppLocalizations.of(context)!.loginFailedError}: $errorMsg'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 8),
+            action: SnackBarAction(
+              label: 'Bypass (Demo)',
+              textColor: Colors.white,
+              onPressed: () async {
+                await ref.read(authStateProvider.notifier).login('demo_farmer');
+                final prefs = await SharedPreferences.getInstance();
+                await prefs.setString('user_role', 'farmer');
+                if (mounted) context.go('/');
+              },
+            ),
+          )
+        );
       }
     } finally {
       if (mounted) {
@@ -256,7 +295,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 children: [
                   Expanded(
                     child: OutlinedButton(
-                      onPressed: () => context.push('/register'),
+                      onPressed: () => context.go('/register'),
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         side: const BorderSide(color: AppColors.primaryGreen),
@@ -268,7 +307,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   const SizedBox(width: 12),
                   Expanded(
                     child: OutlinedButton(
-                      onPressed: () => context.push('/consumer-register'),
+                      onPressed: () => context.go('/consumer-register'),
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         side: BorderSide(color: Colors.blue.shade700),

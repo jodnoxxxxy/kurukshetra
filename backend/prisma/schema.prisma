@@ -6,8 +6,8 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider = "sqlite"
+  url      = "file:./dev.db"
 }
 
 model Farmer {
@@ -39,9 +39,9 @@ model Farm {
   farmerId        String    @map("farmer_id")
   farmName        String?   @map("farm_name")
   locationName    String?   @map("location_name")
-  latitude        Decimal?  @db.Decimal(10, 8)
-  longitude       Decimal?  @db.Decimal(11, 8)
-  areaAcres       Decimal?  @db.Decimal(10, 2) @map("area_acres")
+  latitude        Float?
+  longitude       Float?
+  areaAcres       Float?    @map("area_acres")
   soilType        String?   @map("soil_type")
   irrigationSource String?  @map("irrigation_source")
   createdAt       DateTime  @default(now()) @map("created_at")
@@ -59,13 +59,13 @@ model Crop {
   farmId            String    @map("farm_id")
   cropName          String    @map("crop_name")
   variety           String?
-  plantingDate      DateTime? @map("planting_date") @db.Date
-  expectedHarvest   DateTime? @map("expected_harvest") @db.Date
-  actualHarvest     DateTime? @map("actual_harvest") @db.Date
+  plantingDate      DateTime? @map("planting_date")
+  expectedHarvest   DateTime? @map("expected_harvest")
+  actualHarvest     DateTime? @map("actual_harvest")
   status            String    @default("planted") // planted, growing, ready, harvested
-  areaPlanted       Decimal?  @db.Decimal(10, 2) @map("area_planted")
-  yieldEstimated    Decimal?  @db.Decimal(10, 2) @map("yield_estimated")
-  yieldActual       Decimal?  @db.Decimal(10, 2) @map("yield_actual")
+  areaPlanted       Float?    @map("area_planted")
+  yieldEstimated    Float?    @map("yield_estimated")
+  yieldActual       Float?    @map("yield_actual")
   createdAt         DateTime  @default(now()) @map("created_at")
 
   // Relations
@@ -79,12 +79,12 @@ model MarketPrice {
   id            String   @id @default(uuid())
   cropName      String   @map("crop_name")
   variety       String?
-  pricePerQuintal Decimal @db.Decimal(10, 2) @map("price_per_quintal")
+  pricePerQuintal Float @map("price_per_quintal")
   mandiName     String   @map("mandi_name")
   district      String?
   state         String?
-  priceDate     DateTime @map("price_date") @db.Date
-  changePercent Decimal? @db.Decimal(5, 2) @map("change_percent")
+  priceDate     DateTime @map("price_date")
+  changePercent Float? @map("change_percent")
   trend         String?  // up, down, stable
   createdAt     DateTime @default(now()) @map("created_at")
 
@@ -99,7 +99,7 @@ model ChatMessage {
   messageText   String   @map("message_text")
   isFromUser    Boolean  @map("is_from_user")
   messageType   String   @default("text") @map("message_type") // text, image, audio
-  aiConfidence  Decimal? @db.Decimal(3, 2) @map("ai_confidence")
+  aiConfidence  Float? @map("ai_confidence")
   responseTimeMs Int?    @map("response_time_ms")
   createdAt     DateTime @default(now()) @map("created_at")
 
@@ -114,18 +114,19 @@ model ChatMessage {
 model SoilAnalysis {
   id            String   @id @default(uuid())
   farmId        String   @map("farm_id")
-  nitrogenPpm   Decimal?  @db.Decimal(8, 2) @map("nitrogen_ppm")
-  phosphorusPpm Decimal?  @db.Decimal(8, 2) @map("phosphorus_ppm")
-  potassiumPpm  Decimal?  @db.Decimal(8, 2) @map("potassium_ppm")
-  phLevel       Decimal?  @db.Decimal(4, 2) @map("ph_level")
-  organicMatter Decimal?  @db.Decimal(5, 2) @map("organic_matter")
-  healthScore   Decimal?  @db.Decimal(3, 2) @map("health_score") // 0-100
-  recommendations Json?  // Store AI recommendations as JSON
+  farmerId      String   @map("farmer_id")
+  nitrogenPpm   Float?  @map("nitrogen_ppm")
+  phosphorusPpm Float?  @map("phosphorus_ppm")
+  potassiumPpm  Float?  @map("potassium_ppm")
+  phLevel       Float?  @map("ph_level")
+  organicMatter Float?  @map("organic_matter")
+  healthScore   Float?  @map("health_score") // 0-100
+  recommendations String?
   analyzedAt    DateTime @default(now()) @map("analyzed_at")
 
   // Relations
-  farm          Farm     @relation(fields: [farmId], references: [id], onDelete: Cascade, map: "soil_analyses_farm_fkey")
-  farmer        Farmer   @relation(fields: [farmId], references: [id], onDelete: Cascade, map: "soil_analyses_farmer_fkey")
+  farm          Farm     @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  farmer        Farmer   @relation(fields: [farmerId], references: [id], onDelete: Cascade)
 
   @@map("soil_analyses")
 }
@@ -136,9 +137,9 @@ model PestDetection {
   cropId                  String?  @map("crop_id")
   imageUrl                String?  @map("image_url")
   pestName                String?  @map("pest_name")
-  confidenceScore         Decimal? @db.Decimal(3, 2) @map("confidence_score")
+  confidenceScore         Float? @map("confidence_score")
   severity                String?  // low, medium, high
-  treatmentRecommendations Json?   @map("treatment_recommendations") // Store as JSON
+  treatmentRecommendations String?   @map("treatment_recommendations")
   detectedAt              DateTime @default(now()) @map("detected_at")
 
   // Relations

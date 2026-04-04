@@ -11,6 +11,7 @@ import 'package:kurukshetra/core/widgets/section_header.dart';
 import 'package:kurukshetra/core/widgets/status_badge.dart';
 import 'package:kurukshetra/core/widgets/language_selection_sheet.dart';
 import 'package:kurukshetra/features/navigation/providers/navigation_provider.dart';
+import 'package:kurukshetra/l10n/app_localizations.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -22,6 +23,7 @@ class HomeScreen extends ConsumerStatefulWidget {
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return CustomScrollView(
       physics: const BouncingScrollPhysics(),
       slivers: [
@@ -32,13 +34,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildGreetingCard(),
+                _buildGreetingCard(l10n),
                 const SizedBox(height: 20),
-                _buildDetailedWeatherCard(),
+                _buildDetailedWeatherCard(l10n),
                 const SizedBox(height: 24),
-                _buildAIRecommendationSpotlight(),
+                _buildAIRecommendationSpotlight(l10n),
                 const SizedBox(height: 24),
-                _buildPestDetectionCTA(),
+                _buildPestDetectionCTA(l10n),
                 const SizedBox(height: 32),
                 _buildCategorizedServices(),
               ],
@@ -50,6 +52,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   Widget _buildTopBar(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return SliverAppBar(
       floating: true,
       pinned: false,
@@ -66,7 +69,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         children: [
           const Icon(Icons.agriculture_rounded, color: AppColors.primaryGreen, size: 28),
           const SizedBox(width: 10),
-          Text('Kurukshetra', style: AppTextStyles.h2.copyWith(fontSize: 18)),
+          Text(l10n.appTitle, style: AppTextStyles.h2.copyWith(fontSize: 18)),
         ],
       ),
       actions: [
@@ -96,21 +99,25 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  Widget _buildGreetingCard() {
+  Widget _buildGreetingCard(AppLocalizations l10n) {
     final hour = DateTime.now().hour;
-    String greeting = "Good Morning";
+    String greeting = l10n.greetingMorning;
+    String motivation = l10n.motivationMorning;
     IconData icon = Icons.wb_sunny_rounded;
     Color iconColor = Colors.orangeAccent;
 
     if (hour >= 12 && hour < 17) {
-      greeting = "Good Afternoon";
+      greeting = l10n.greetingAfternoon;
+      motivation = l10n.motivationAfternoon;
       icon = Icons.wb_cloudy_rounded;
     } else if (hour >= 17 && hour < 21) {
-      greeting = "Good Evening";
+      greeting = l10n.greetingEvening;
+      motivation = l10n.motivationEvening;
       icon = Icons.wb_twilight_rounded;
       iconColor = Colors.orange;
     } else if (hour >= 21 || hour < 5) {
-      greeting = "Good Night";
+      greeting = l10n.greetingNight;
+      motivation = l10n.motivationNight;
       icon = Icons.nightlight_round;
       iconColor = Colors.yellowAccent;
     }
@@ -126,10 +133,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('$greeting, Farmer', style: AppTextStyles.h2.copyWith(color: Colors.white, fontSize: 22)),
+                Text('$greeting, ${l10n.farmer}', style: AppTextStyles.h2.copyWith(color: Colors.white, fontSize: 22)),
                 const SizedBox(height: 4),
                 Text(
-                  'Your farm is looking healthy today 🌾',
+                  motivation,
                   style: AppTextStyles.bodyMedium.copyWith(color: Colors.white.withValues(alpha: 0.8), fontSize: 13),
                 ),
               ],
@@ -140,7 +147,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  Widget _buildDetailedWeatherCard() {
+  Widget _buildDetailedWeatherCard(AppLocalizations l10n) {
     return AppCard(
       padding: EdgeInsets.zero,
       color: Colors.blue.shade600,
@@ -175,7 +182,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text('28.5°C', style: TextStyle(color: Colors.white, fontSize: 48, fontWeight: FontWeight.w900)),
-                    const Text('Partly Cloudy', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w500, fontSize: 18)),
+                    Text(l10n.partlyCloudy, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w500, fontSize: 18)),
                   ],
                 ),
                 const Icon(Icons.wb_sunny_rounded, color: Colors.yellowAccent, size: 80),
@@ -207,7 +214,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  Widget _buildAIRecommendationSpotlight() {
+  Widget _buildAIRecommendationSpotlight(AppLocalizations l10n) {
     return AppCard(
       padding: const EdgeInsets.all(24),
       border: Border.all(color: AppColors.primaryGreen.withValues(alpha: 0.1), width: 2),
@@ -222,17 +229,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 children: [
                   const Icon(Icons.auto_awesome_rounded, color: AppColors.primaryGreen, size: 24),
                   const SizedBox(width: 10),
-                  Text('AI Recommendation', style: AppTextStyles.h3.copyWith(color: AppColors.primaryGreen)),
+                  Text(l10n.aiRecommendation, style: AppTextStyles.h3.copyWith(color: AppColors.primaryGreen)),
                 ],
               ),
-              StatusBadge(label: '92% Match', statusType: StatusType.success),
+              StatusBadge(label: l10n.matchScore('92'), statusType: StatusType.success),
             ],
           ),
           const SizedBox(height: 20),
-          Text('Suggested Next Crop: Soybean', style: AppTextStyles.h2.copyWith(fontSize: 18)),
+          Text(l10n.suggestedNextCrop, style: AppTextStyles.h2.copyWith(fontSize: 18)),
           const SizedBox(height: 8),
           Text(
-            'Optimal soil pH and upcoming monsoon predicted for your coordinates.',
+            l10n.recommendationReason,
             style: AppTextStyles.bodyMedium.copyWith(color: Colors.grey.shade600),
           ),
           const SizedBox(height: 24),
@@ -246,7 +253,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
               ),
               child: Text(
-                'Analyze Full Farm Data',
+                l10n.analyzeFullFarmData,
                 style: AppTextStyles.bodyBold.copyWith(color: AppColors.primaryGreen),
               ),
             ),
@@ -256,7 +263,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  Widget _buildPestDetectionCTA() {
+  Widget _buildPestDetectionCTA(AppLocalizations l10n) {
     return AppCard(
       color: const Color(0xFF2E7D32),
       padding: const EdgeInsets.all(20),
@@ -273,9 +280,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Identify Pest & Disease', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                Text(l10n.identifyPestAndDisease, style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 4),
-                const Text('1. Take Photo  ▶  2. Upload  ▶  3. Result', style: TextStyle(color: Colors.white70, fontSize: 9)),
+                Text('${l10n.pestStep1}  ▶  ${l10n.pestStep2}  ▶  ${l10n.pestStep3}', style: const TextStyle(color: Colors.white70, fontSize: 9)),
               ],
             ),
           ),

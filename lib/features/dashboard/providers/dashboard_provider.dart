@@ -1,4 +1,11 @@
+import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:kurukshetra/features/profile/providers/profile_provider.dart';
+import 'package:kurukshetra/features/home/providers/crop_provider.dart';
+import 'package:kurukshetra/features/profile/repositories/profile_repository.dart';
+import 'package:kurukshetra/features/home/repositories/crop_repository.dart';
 
 class FarmerDashboardState {
   final bool isLoading;
@@ -91,6 +98,14 @@ class FarmerDashboardState {
 class DashboardNotifier extends Notifier<FarmerDashboardState> {
   @override
   FarmerDashboardState build() {
+    // Watch providers to trigger rebuilds on data changes
+    ref.listen(profileProvider, (previous, next) {
+      _loadDashboardData();
+    });
+    ref.listen(cropProvider, (previous, next) {
+      _loadDashboardData();
+    });
+
     // Schedule load for after the build phase
     Future.microtask(() => _loadDashboardData());
     return FarmerDashboardState();
@@ -100,47 +115,86 @@ class DashboardNotifier extends Notifier<FarmerDashboardState> {
     state = state.copyWith(isLoading: true, error: null);
 
     try {
-      // API call simulation
-      await Future.delayed(const Duration(seconds: 1));
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('auth_token') ?? 'demo_farmer';
+      
+      final profileRepo = ref.read(profileRepositoryProvider);
+      final cropRepo = ref.read(cropRepositoryProvider);
 
-      // MOCk Data aggregated from different conceptual modules
+      // Fetch Profile and Crops in parallel
+      final results = await Future.wait([
+        profileRepo.getFarmerProfile(),
+        cropRepo.getCrops(),
+        cropRepo.getMarketPrices(),
+      ]);
+
+      final profile = results[0] as dynamic; // FarmerProfile
+      final realCrops = results[1] as List<dynamic>; // List<Crop>
+      final marketPrices = results[2] as List<dynamic>; // List<MarketPrice>
+
+      // Map backend crops to dashboard format
+      final activeCrops = realCrops.map((c) => {
+        'id': c.id,
+        'name': c.name,
+        'stage': c.status == 'growing' ? 'Vegetative' : 'Growing',
+        'days': DateTime.now().difference(c.sowingDate).inDays,
+        'icon': c.icon,
+      }).toList();
+
+      final cropHealth = realCrops.map((c) => {
+        'name': c.name,
+        'status': 'Healthy',
+        'riskLevel': 'Low',
+        'icon': c.icon,
+      }).toList();
+
+      // Fetch financial analytics from backend
+      try {
+        final analyticsRes = await http.get(
+          Uri.parse('http://localhost:5000/api/v1/farmers/analytics'),
+          headers: {
+            'Authorization': 'Bearer $token',
+            'Content-Type': 'application/json',
+          },
+        ).timeout(const Duration(seconds: 10));
+
+        if (analyticsRes.statusCode == 200) {
+          final analyticsRaw = jsonDecode(analyticsRes.body)['data'];
+          state = state.copyWith(
+            totalInvestment: (analyticsRaw['totalInvestment'] as num).toDouble(),
+            totalSales: (analyticsRaw['totalSales'] as num).toDouble(),
+            expectedProfit: (analyticsRaw['expectedProfit'] as num).toDouble(),
+            organicScore: (analyticsRaw['organicScore'] as num).toDouble(),
+          );
+        }
+      } catch (analyticsError) {
+        print('Analytics fetch failed: $analyticsError');
+      }
+
       state = state.copyWith(
         isLoading: false,
-        farmAreaAcres: 5.0,
-        totalCrops: 3,
-        currentSeason: 'Rabi',
-        location: 'Khadavali',
-        activeCrops: [
-          {'name': 'Soybean', 'stage': 'Vegetative', 'days': 25, 'icon': '🌱'},
-          {'name': 'Tomato', 'stage': 'Flowering', 'days': 40, 'icon': '🍅'},
-          {'name': 'Wheat', 'stage': 'Harvesting', 'days': 90, 'icon': '🌾'},
-        ],
-        cropHealthOverview: [
-          {'name': 'Soybean', 'status': 'Healthy', 'riskLevel': 'Low', 'icon': '🌱'},
-          {'name': 'Tomato', 'status': 'Moderate Risk', 'riskLevel': 'Medium', 'icon': '🍅', 'alert': 'High humidity. Risk of blights.'},
-        ],
+        farmAreaAcres: profile.farmArea,
+        totalCrops: realCrops.length,
+        currentSeason: 'Current',
+        location: profile.location,
+        activeCrops: activeCrops,
+        cropHealthOverview: cropHealth,
+        organicScore: profile.organicScore,
+        marketPrices: marketPrices.map((m) => {
+          'crop': m.cropName,
+          'price': '₹${m.pricePerQuintal.toInt()}',
+          'unit': 'quintal',
+          'trend': m.trend,
+        }).toList(),
         soilHealth: {
-          'Nitrogen (N)': 'Medium',
-          'Phosphorus (P)': 'High',
-          'Potassium (K)': 'Medium',
-          'pH': '6.8 (Optimal)',
+          'Nitrogen (N)': 'Optimal',
+          'Phosphorus (P)': 'Good',
+          'Potassium (K)': 'Optimal',
+          'pH': '6.5',
         },
-        organicScore: 82.0,
-        totalInvestment: 20000.0,
-        totalSales: 32000.0,
-        expectedProfit: 12000.0,
-        marketPrices: [
-          {'crop': 'Soybean', 'price': '₹5100', 'unit': 'quintal', 'trend': 'up'},
-          {'crop': 'Tomato', 'price': '₹32', 'unit': 'kg', 'trend': 'down'},
-          {'crop': 'Wheat', 'price': '₹2400', 'unit': 'quintal', 'trend': 'stable'},
-        ],
-        cropRecommendations: [
-          {'crop': 'Soybean', 'suitability': 92, 'reason': 'Optimal soil pH and upcoming monsoon.'},
-          {'crop': 'Groundnut', 'suitability': 88, 'reason': 'Good market demand, suitable for sandy loam.'},
-          {'crop': 'Ragi', 'suitability': 85, 'reason': 'Drought resistant, good for current soil N levels.'},
-        ],
       );
     } catch (e) {
+      print('Dashboard error: $e');
       state = state.copyWith(isLoading: false, error: 'Failed to load dashboard data. Please pull down to refresh.');
     }
   }

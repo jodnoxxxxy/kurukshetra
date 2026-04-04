@@ -31,9 +31,30 @@ const server = http.createServer(app);
 app.use(helmet());
 
 // CORS configuration
+const allowedOrigins = [
+  ...((config.FRONTEND_URL || '').split(',').map(o => o.trim())),
+  'http://localhost:50042',
+  'http://localhost:63783',
+  'http://localhost:3000',
+  'http://localhost:56493',
+  'http://127.0.0.1:50042',
+  'http://127.0.0.1:63783',
+].filter(Boolean);
+
 app.use(cors({
-  origin: config.FRONTEND_URL,
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.indexOf(origin) !== -1 || origin.startsWith('http://localhost:')) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 
 // Body parsing middleware
@@ -139,4 +160,4 @@ process.on('SIGTERM', async () => {
   });
 });
 
-module.exports = { app, server };
+module.exports = { app, server, startServer };

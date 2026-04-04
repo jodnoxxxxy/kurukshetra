@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kurukshetra/core/constants/app_colors.dart';
 import 'package:kurukshetra/l10n/app_localizations.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class RegistrationScreen extends StatefulWidget {
   const RegistrationScreen({super.key});
@@ -34,9 +35,9 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   }
 
   void _nextStep() {
-    if (_currentStep < 4) {
+    if (_currentStep < 3) {
       setState(() => _currentStep++);
-    } else {
+    } else if (_currentStep == 3) {
       _completeRegistration();
     }
   }
@@ -44,81 +45,104 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   bool _isRegistering = false;
 
   void _completeRegistration() async {
+    if (_isRegistering) return;
+    
+    // Validate required fields
+    if (_nameController.text.isEmpty || _mobileController.text.isEmpty || _passwordController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please fill in all required fields'), backgroundColor: Colors.red)
+      );
+      return;
+    }
+    
     setState(() { _isRegistering = true; });
 
     try {
-      final data = {
-        'name': _nameController.text.trim(),
-        'phone': _mobileController.text.trim(),
-        'password': _passwordController.text.trim(),
-        'district': _selectedDistrict,
-        'taluka': _selectedTaluka,
-        'village': _selectedVillage,
-        'createdAt': FieldValue.serverTimestamp(),
-        'organicScore': 0.0,
-        'organicStatus': 'Not Certified',
-        'isVerified': false,
-        'farmerId': 'FARM${DateTime.now().millisecondsSinceEpoch % 1000000}',
-        'farmArea': 0.0,
-        'profilePhoto': '',
-        'email': '',
-        'preferredLanguage': 'English',
-        'notificationPreferences': {
-          'weather_alerts': true,
-          'pest_alerts': true,
-          'market_price_alerts': true,
-          'order_notifications': true,
-          'government_schemes': true,
-        },
-        'landRecords': [],
-        'cropHistory': [],
-        'paymentDetails': {
-          'bankName': 'Not Set',
-          'accountNumber': '',
-          'accountHolder': _nameController.text.trim(),
-          'ifscCode': '',
-          'upiId': '',
-          'transactions': [],
-        },
-      };
-      
-      // Check for existing phone number
-      final query = await FirebaseFirestore.instance
-          .collection('farmers')
-          .where('phone', isEqualTo: data['phone'])
-          .get();
-          
-      if (query.docs.isNotEmpty) {
-        throw Exception('Phone number already registered. Please login.');
-      }
-      
-      // Create account
-      final docRef = await FirebaseFirestore.instance.collection('farmers').add(data);
-      
-      // SAVE SESSION DATA - THIS WAS MISSING
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('auth_token', docRef.id);
-      await prefs.setString('user_id', docRef.id);
-      await prefs.setString('user_name', data['name'] as String);
-      await prefs.setString('user_role', 'farmer');
-      
-      if (mounted) {
-        context.go('/');
+      // Call backend registration API
+      final response = await http.post(
+        Uri.parse('http://localhost:5000/api/v1/auth/register'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'name': _nameController.text.trim(),
+          'email': '${_mobileController.text.trim()}@farmer.local',
+          'phone': _mobileController.text.trim(),
+          'password': _passwordController.text.trim(),
+          'district': _selectedDistrict ?? 'Unknown',
+          'taluka': _selectedTaluka ?? 'Unknown',
+          'village': _selectedVillage ?? 'Unknown',
+          'location': '${_selectedDistrict}, ${_selectedTaluka}, ${_selectedVillage}',
+          'state': _selectedDistrict,
+        }),
+      ).timeout(
+        const Duration(seconds: 15),
+        onTimeout: () => throw Exception('Connection timeout. Make sure the backend server is running on http://localhost:5000'),
+      );
+
+      if (response.statusCode == 201) {
+        final responseData = jsonDecode(response.body);
+        final token = responseData['data']['token'];
+        
+        // Save session data
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('auth_token', token);
+        await prefs.setString('user_id', responseData['data']['farmer']['id'] ?? 'farmer_${_mobileController.text}');
+        await prefs.setString('user_name', _nameController.text.trim());
+        await prefs.setString('user_role', 'farmer');
+        
+        if (mounted) {
+          setState(() {
+            _isRegistering = false;
+            _currentStep = 4;
+          });
+        }
+      } else if (response.statusCode == 400) {
+        final error = jsonDecode(response.body);
+        throw Exception(error['message'] ?? 'Registration failed');
+      } else {
+        throw Exception('Server error: ${response.statusCode}');
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Registration Failed: $e'), backgroundColor: Colors.red)
-        );
-      }
-    } finally {
-      if (mounted) {
         setState(() { _isRegistering = false; });
+        final errorMsg = e.toString().replaceAll('Exception: ', '');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Registration Failed: $errorMsg'), 
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 8),
+            action: SnackBarAction(
+              label: 'Bypass (Demo)', 
+              textColor: Colors.white,
+              onPressed: () async {
+                final prefs = await SharedPreferences.getInstance();
+                await prefs.setString('auth_token', 'demo_farmer');
+                await prefs.setString('user_id', 'demo_farmer');
+                await prefs.setString('user_role', 'farmer');
+                await prefs.setString('user_name', _nameController.text.isEmpty ? 'Demo Farmer' : _nameController.text);
+                if (mounted) context.go('/');
+              }
+            ),
+          )
+        );
       }
     }
   }
 
-  void _showLocationPicker(String title, List<String> items, Function(String) onSelect) {
+  Widget _buildLoadingIndicator(AppLocalizations l10n) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+        const SizedBox(height: 12),
+        Text(
+          'Connecting to server...',
+          style: TextStyle(color: Colors.white.withValues(alpha: 0.8), fontSize: 12),
+        ),
+      ],
+    );
+  }
+
+  void _showLocationPicker(String title, List<String> items, Function(String) onSelect, AppLocalizations l10n) {
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
@@ -131,7 +155,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                '\${l10n.selectTitle} $title',
+                '${l10n.selectTitle} $title',
                 style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -226,7 +250,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
         ),
         const SizedBox(height: 8),
         Text(
-          '\${l10n.sentTo} \${_mobileController.text}',
+          '${l10n.sentTo} ${_mobileController.text}',
           style: const TextStyle(color: AppColors.textSecondary),
         ),
         const SizedBox(height: 24),
@@ -274,6 +298,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
               _selectedTaluka = null;
               _selectedVillage = null;
             }),
+            l10n,
           ),
         ),
         const SizedBox(height: 16),
@@ -293,6 +318,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
               _selectedTaluka = val;
               _selectedVillage = null;
             }),
+            l10n,
           ),
         ),
         const SizedBox(height: 16),
@@ -309,16 +335,34 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
             l10n.village,
             ['Village A', 'Village B', 'Village C'],
             (val) => setState(() => _selectedVillage = val),
+            l10n,
           ),
         ),
 
         const SizedBox(height: 32),
         ElevatedButton(
-          onPressed: (_selectedDistrict != null && _selectedTaluka != null && _selectedVillage != null) 
+          onPressed: (_selectedDistrict != null && _selectedTaluka != null && _selectedVillage != null && !_isRegistering) 
               ? _nextStep 
               : null,
-          child: Text(l10n.continueButton),
+          child: _isRegistering 
+              ? _buildLoadingIndicator(l10n)
+              : Text(l10n.continueButton),
         ),
+        if (_isRegistering)
+          Padding(
+            padding: const EdgeInsets.only(top: 16),
+            child: TextButton(
+              onPressed: () async {
+                final prefs = await SharedPreferences.getInstance();
+                await prefs.setString('auth_token', 'demo_farmer');
+                await prefs.setString('user_id', 'demo_farmer');
+                await prefs.setString('user_role', 'farmer');
+                await prefs.setString('user_name', _nameController.text.isEmpty ? 'Demo' : _nameController.text);
+                if (mounted) context.go('/');
+              },
+              child: const Text('Taking too long? Use Demo Mode', style: TextStyle(color: Colors.grey, fontSize: 13, decoration: TextDecoration.underline)),
+            ),
+          ),
       ],
     );
   }
@@ -347,10 +391,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
         ),
         const SizedBox(height: 32),
         ElevatedButton(
-          onPressed: _isRegistering ? null : _completeRegistration,
-          child: _isRegistering 
-              ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-              : Text(l10n.goToHome),
+          onPressed: () => context.go('/'),
+          child: Text(l10n.goToHome),
         ),
       ],
     );
@@ -362,6 +404,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.registrationTitle),
+        automaticallyImplyLeading: _currentStep < 4,
         leading: _currentStep < 4
             ? IconButton(
                 icon: const Icon(Icons.arrow_back),

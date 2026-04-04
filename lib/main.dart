@@ -11,6 +11,8 @@ import 'package:kurukshetra/features/profile/providers/profile_provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 
+const bool kIsWeb = bool.fromEnvironment('dart.library.js_util');
+
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp(
@@ -20,10 +22,24 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
-  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+  
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+    
+    // Only set background handler on mobile and desktop platforms
+    if (!kIsWeb) {
+      FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+    }
+    
+    // Request notification permissions on web
+    if (kIsWeb) {
+      await FirebaseMessaging.instance.requestPermission();
+    }
+  } catch (e) {
+    print('Firebase initialization error: $e');
+  }
 
   runApp(
     // Wrap entire app in ProviderScope for Riverpod
@@ -36,6 +52,26 @@ void main() async {
 class MyApp extends ConsumerWidget {
   const MyApp({super.key});
 
+  Locale _resolveLocale(String language) {
+    switch (language.trim().toLowerCase()) {
+      case 'marathi':
+      case 'मराठी':
+      case 'mr':
+      case 'mr_in':
+      case 'mr-in':
+        return const Locale('mr');
+      case 'hindi':
+      case 'हिन्दी':
+      case 'हिंदी':
+      case 'hi':
+      case 'hi_in':
+      case 'hi-in':
+        return const Locale('hi');
+      default:
+        return const Locale('en');
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     ref.watch(fcmBootstrapProvider);
@@ -43,17 +79,7 @@ class MyApp extends ConsumerWidget {
 
     final language = ref.watch(languageProvider);
     
-    Locale locale;
-    switch (language) {
-      case 'Marathi':
-        locale = const Locale('mr');
-        break;
-      case 'Hindi':
-        locale = const Locale('hi');
-        break;
-      default:
-        locale = const Locale('en');
-    }
+    final locale = _resolveLocale(language);
 
     return MaterialApp.router(
       title: 'Kurukshetra',

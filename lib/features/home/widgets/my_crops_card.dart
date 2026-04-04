@@ -5,6 +5,7 @@ import 'package:kurukshetra/core/constants/app_colors.dart';
 import 'package:kurukshetra/features/home/models/crop.dart';
 import 'package:kurukshetra/features/home/providers/crop_provider.dart';
 import 'package:kurukshetra/features/home/screens/add_crop_screen.dart';
+import 'package:kurukshetra/features/ai/pest/screens/pest_detection_screen.dart';
 
 class MyCropsCard extends ConsumerWidget {
   const MyCropsCard({super.key});
@@ -289,6 +290,8 @@ class MyCropsCard extends ConsumerWidget {
                 _viewCropDetails(context, crop);
               } else if (value == 'edit') {
                 _editCrop(context, crop);
+              } else if (value == 'analyze') {
+                Navigator.push(context, MaterialPageRoute(builder: (context) => const PestDetectionScreen()));
               } else if (value == 'delete') {
                 _deleteCrop(context, ref, crop);
               }
@@ -301,6 +304,16 @@ class MyCropsCard extends ConsumerWidget {
                     Icon(Icons.visibility, size: 16),
                     SizedBox(width: 8),
                     Text('View Details'),
+                  ],
+                ),
+              ),
+              const PopupMenuItem(
+                value: 'analyze',
+                child: Row(
+                  children: [
+                    Icon(Icons.health_and_safety, size: 16, color: Colors.green),
+                    SizedBox(width: 8),
+                    Text('Analyze Health', style: TextStyle(color: Colors.green)),
                   ],
                 ),
               ),

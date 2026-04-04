@@ -31,7 +31,7 @@ class ProfileScreen extends ConsumerWidget {
       return Scaffold(
         backgroundColor: const Color(0xFFF9FBF9),
         appBar: AppBar(title: Text(l10n.myProfile), backgroundColor: Colors.white, elevation: 0),
-        body: Center(child: Text(profileState.error ?? 'Profile not found')),
+        body: Center(child: Text(profileState.error ?? l10n.errorLabel)),
       );
     }
 
@@ -44,7 +44,7 @@ class ProfileScreen extends ConsumerWidget {
             expandedHeight: 0,
             floating: true,
             pinned: true,
-            title: Text('My Profile', style: AppTextStyles.h1.copyWith(fontSize: 20)),
+            title: Text(l10n.myProfile, style: AppTextStyles.h1.copyWith(fontSize: 20)),
             backgroundColor: const Color(0xFFF9FBF9),
             elevation: 0,
             centerTitle: false,
@@ -59,61 +59,61 @@ class ProfileScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 32),
 
-                const SectionHeader(title: 'Farm Details', icon: Icons.agriculture_rounded),
+                SectionHeader(title: l10n.farmDetails, icon: Icons.agriculture_rounded),
                 ListTileCard(
                   icon: Icons.description_rounded,
-                  title: 'Land Records',
-                  subtitle: '${profile.landRecords.length} Records Verified',
+                  title: l10n.landRecords,
+                  subtitle: '${profile.landRecords.length} ${l10n.recordsLabel}',
                   onTap: () => context.push('/profile/land-records'),
                 ),
                 ListTileCard(
                   icon: Icons.history_rounded,
-                  title: 'Crop History',
-                  subtitle: '${profile.cropHistory.length} Previous Harvests',
+                  title: l10n.cropHistory,
+                  subtitle: '${profile.cropHistory.length} ${l10n.cropsTrackedLabel}',
                   onTap: () => context.push('/profile/crop-history'),
                 ),
                 const SizedBox(height: 32),
 
-                const SectionHeader(title: 'Preferences', icon: Icons.settings_rounded),
+                SectionHeader(title: l10n.preferences, icon: Icons.settings_rounded),
                 ListTileCard(
                   icon: Icons.translate_rounded,
-                  title: 'Language',
+                  title: l10n.language,
                   subtitle: currentLanguage,
                   onTap: () => _showLanguageDialog(context, ref),
                 ),
                 ListTileCard(
                   icon: Icons.notifications_rounded,
-                  title: 'Notifications',
-                  subtitle: 'Receive alerts for climate & price',
+                  title: l10n.notifications,
+                  subtitle: l10n.notificationsSubtitle,
                   onTap: () => context.push('/profile/notifications'),
                 ),
                 const SizedBox(height: 32),
 
-                const SectionHeader(title: 'Reports & Account', icon: Icons.assessment_rounded),
+                SectionHeader(title: l10n.account, icon: Icons.assessment_rounded),
                  ListTileCard(
                   icon: Icons.analytics_rounded,
-                  title: 'Farm Reports',
-                  subtitle: 'Yield analytics & analysis',
+                  title: l10n.farmReports,
+                  subtitle: l10n.farmReportsSubtitle,
                   onTap: () => context.push('/profile/reports'),
                 ),
                 ListTileCard(
                   icon: Icons.verified_user_rounded,
-                  title: 'Organic Certification',
-                  subtitle: '${profile.organicScore.toInt()}% Score Verified',
+                  title: l10n.organicCertification,
+                  subtitle: '${profile.organicScore.toInt()}% ${l10n.verifiedTitle}',
                   onTap: () => context.push('/profile/organic'),
                 ),
                 const SizedBox(height: 32),
 
-                const SectionHeader(title: 'Support', icon: Icons.help_rounded),
+                SectionHeader(title: l10n.support, icon: Icons.help_rounded),
                 ListTileCard(
                   icon: Icons.support_agent_rounded,
-                  title: 'Help & Support',
-                  subtitle: 'Chat with our experts',
+                  title: l10n.helpSupport,
+                  subtitle: l10n.helpSupportSubtitle,
                   onTap: () => context.push('/profile/help'),
                 ),
                 ListTileCard(
                   icon: Icons.logout_rounded,
-                  title: 'Logout',
+                  title: l10n.logout,
                   iconColor: Colors.redAccent,
                   onTap: () => _showLogoutDialog(context, ref),
                   trailing: const SizedBox.shrink(),
@@ -142,12 +142,12 @@ class ProfileScreen extends ConsumerWidget {
       context: context,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        title: Text('Logout', style: AppTextStyles.h3),
-        content: Text('Are you sure you want to log out?', style: AppTextStyles.bodyMedium),
+        title: Text(AppLocalizations.of(context)!.logout, style: AppTextStyles.h3),
+        content: Text(AppLocalizations.of(context)!.logoutConfirm, style: AppTextStyles.bodyMedium),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: Text('CANCEL', style: AppTextStyles.badgeText.copyWith(color: Colors.grey)),
+            child: Text(AppLocalizations.of(context)!.cancel, style: AppTextStyles.badgeText.copyWith(color: Colors.grey)),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -162,7 +162,7 @@ class ProfileScreen extends ConsumerWidget {
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
-            child: const Text('LOGOUT', style: TextStyle(fontWeight: FontWeight.bold)),
+            child: Text(AppLocalizations.of(context)!.logout, style: const TextStyle(fontWeight: FontWeight.bold)),
           ),
         ],
       ),

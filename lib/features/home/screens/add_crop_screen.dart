@@ -108,6 +108,41 @@ class _AddCropScreenState extends ConsumerState<AddCropScreen> {
     }
   }
 
+  Future<void> _deleteCrop() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Crop'),
+        content: Text('Are you sure you want to delete ${_selectedCrop}?'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      setState(() => _isLoading = true);
+      try {
+        await ref.read(myCropProvider.notifier).deleteCrop(widget.crop!.id);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Crop deleted successfully')));
+          Navigator.of(context).pop();
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to delete: $e')));
+        }
+      } finally {
+        if (mounted) setState(() => _isLoading = false);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -115,6 +150,13 @@ class _AddCropScreenState extends ConsumerState<AddCropScreen> {
         title: Text(widget.crop == null ? 'Add Crop' : 'Edit Crop'),
         backgroundColor: AppColors.primaryGreen,
         foregroundColor: Colors.white,
+        actions: [
+          if (widget.crop != null)
+            IconButton(
+              icon: const Icon(Icons.delete_outline),
+              onPressed: _isLoading ? null : _deleteCrop,
+            ),
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -123,58 +165,33 @@ class _AddCropScreenState extends ConsumerState<AddCropScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Crop Selection
-              const Text(
-                'Select Crop',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
+              const Text('Select Crop', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               const SizedBox(height: 16),
               _buildCropSelection(),
-              
               const SizedBox(height: 24),
-              
-              // Sowing Date
-              const Text(
-                'Sowing Date',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
+              const Text('Sowing Date', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               const SizedBox(height: 16),
               _buildDateSelector(),
-              
               const SizedBox(height: 24),
-              
-              // Area
-              const Text(
-                'Farm Area',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
+              const Text('Farm Area', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               const SizedBox(height: 16),
               TextFormField(
                 controller: _areaController,
                 decoration: InputDecoration(
                   labelText: 'Area in Acres',
                   prefixIcon: const Icon(Icons.agriculture),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                   suffixText: 'Acres',
                 ),
                 keyboardType: TextInputType.number,
                 validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Please enter area';
-                  }
+                  if (value == null || value.trim().isEmpty) return 'Please enter area';
                   final area = double.tryParse(value);
-                  if (area == null || area <= 0) {
-                    return 'Please enter a valid area';
-                  }
+                  if (area == null || area <= 0) return 'Please enter a valid area';
                   return null;
                 },
               ),
-              
               const SizedBox(height: 32),
-              
-              // Save Button
               SizedBox(
                 width: double.infinity,
                 height: 50,
@@ -183,18 +200,29 @@ class _AddCropScreenState extends ConsumerState<AddCropScreen> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primaryGreen,
                     foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
                   child: _isLoading
                       ? const CircularProgressIndicator(color: Colors.white)
-                      : Text(
-                          widget.crop == null ? 'Add Crop' : 'Update Crop',
-                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                        ),
+                      : Text(widget.crop == null ? 'Add Crop' : 'Update Crop', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                 ),
               ),
+              if (widget.crop != null) ...[
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
+                  height: 50,
+                  child: OutlinedButton.icon(
+                    onPressed: _isLoading ? null : _deleteCrop,
+                    icon: const Icon(Icons.delete, color: Colors.red),
+                    label: const Text('Delete Crop', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+                    style: OutlinedButton.styleFrom(
+                      side: const BorderSide(color: Colors.red),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                  ),
+                ),
+              ],
             ],
           ),
         ),

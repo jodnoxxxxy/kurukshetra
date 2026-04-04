@@ -3,12 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kurukshetra/core/constants/app_colors.dart';
 import 'package:kurukshetra/core/theme/app_text_styles.dart';
 import 'package:kurukshetra/features/profile/providers/profile_provider.dart';
+import 'package:kurukshetra/l10n/app_localizations.dart';
 
 class LanguageSelectionSheet extends ConsumerWidget {
   const LanguageSelectionSheet({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final currentLanguage = ref.watch(languageProvider);
     final languages = [
       {'flag': '🇬🇧', 'name': 'English', 'native': 'English'},
@@ -37,7 +39,7 @@ class LanguageSelectionSheet extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 24),
-          Text('Select Language', style: AppTextStyles.h2),
+          Text(l10n.selectLanguage, style: AppTextStyles.h2),
           const SizedBox(height: 24),
           ...languages.map((lang) {
             final isSelected = currentLanguage == lang['name'];

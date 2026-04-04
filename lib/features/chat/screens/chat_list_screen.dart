@@ -190,6 +190,7 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
           ],
         ),
         onTap: () {
+          ref.read(chatProvider.notifier).selectChatRoom(chatRoom);
           Navigator.of(context).push(
             MaterialPageRoute(
               builder: (context) => const ChatScreen(),

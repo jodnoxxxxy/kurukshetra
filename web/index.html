@@ -31,6 +31,49 @@
 
   <title>kurukshetra</title>
   <link rel="manifest" href="manifest.json">
+
+  <!-- Firebase messaging service worker -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function () {
+        navigator.serviceWorker.register('firebase-messaging-sw.js', {scope: '/firebase-cloud-messaging-push-scope'})
+          .then(function (registration) {
+            console.log('Firebase messaging service worker registered successfully', registration);
+          })
+          .catch(function (error) {
+            console.log('Firebase messaging service worker registration failed: ', error);
+          });
+      });
+    }
+  </script>
+
+  <!-- Suppress non-critical DevTools console warnings on web -->
+  <script>
+    const originalWarn = console.warn;
+    const originalError = console.error;
+    
+    console.warn = function(...args) {
+      const message = args.join(' ');
+      // Suppress DevTools extension warnings (non-critical on web)
+      if (message.includes('ext.flutter.activeDevToolsServerAddress') || 
+          message.includes('ext.flutter.connectedVmServiceUri') ||
+          message.includes('Unknown method')) {
+        return;
+      }
+      originalWarn.apply(console, args);
+    };
+
+    console.error = function(...args) {
+      const message = args.join(' ');
+      // Suppress DevTools extension errors (non-critical on web)
+      if (message.includes('ext.flutter.activeDevToolsServerAddress') || 
+          message.includes('ext.flutter.connectedVmServiceUri') ||
+          message.includes('Unknown method')) {
+        return;
+      }
+      originalError.apply(console, args);
+    };
+  </script>
 </head>
 <body>
   <script src="flutter_bootstrap.js" async></script>

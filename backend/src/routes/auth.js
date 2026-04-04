@@ -10,18 +10,19 @@ const { prisma } = require('../config/database');
 // Validation schemas
 const registerSchema = Joi.object({
   name: Joi.string().required(),
-  email: Joi.string().email().required(),
+  email: Joi.string().allow('').optional(),
   phone: Joi.string().required(),
   password: Joi.string().min(6).required(),
-  location: Joi.string().required(),
-  state: Joi.string().required(),
   district: Joi.string().required(),
-});
+  taluka: Joi.string().allow('').optional(),
+  village: Joi.string().allow('').optional(),
+}).unknown(true);
 
 const loginSchema = Joi.object({
-  email: Joi.string().email().required(),
+  email: Joi.string().allow('').optional(),
+  phone: Joi.string().optional(),
   password: Joi.string().required(),
-});
+}).or('email', 'phone');
 
 // POST /api/v1/auth/register
 router.post('/register', async (req, res) => {
@@ -35,17 +36,22 @@ router.post('/register', async (req, res) => {
       });
     }
 
-    const { name, email, phone, password, location, state, district } = req.body;
+    const { name, email, phone, password, district, taluka, village } = req.body;
 
-    // Check if user already exists
-    const existingUser = await prisma.farmer.findUnique({
-      where: { email },
+    // Check if phone already exists
+    const existingUser = await prisma.farmer.findFirst({
+      where: {
+        OR: [
+          { phone: phone },
+          { email: email || 'never_match_empty' }
+        ]
+      },
     });
 
     if (existingUser) {
       return res.status(400).json({
         status: 'error',
-        message: 'Email already registered',
+        message: 'Phone number or email already registered',
       });
     }
 
@@ -56,24 +62,26 @@ router.post('/register', async (req, res) => {
     const farmer = await prisma.farmer.create({
       data: {
         name,
-        email,
+        email: email || `farmer_${phone}@kurukshetra.local`,
         phone,
         passwordHash,
-        location,
-        state,
+        location: `${district}, ${taluka}, ${village}`,
+        state: district,
         district,
+        village,
       },
       select: {
         id: true,
         name: true,
         email: true,
+        phone: true,
         verified: true,
       },
     });
 
     // Generate JWT token
     const token = jwt.sign(
-      { id: farmer.id, email: farmer.email },
+      { id: farmer.id, email: farmer.email, phone: farmer.phone },
       config.JWT_SECRET,
       { expiresIn: config.JWT_EXPIRE_IN }
     );
@@ -106,11 +114,16 @@ router.post('/login', async (req, res) => {
       });
     }
 
-    const { email, password } = req.body;
+    const { email, phone, password } = req.body;
 
     // Find user
-    const farmer = await prisma.farmer.findUnique({
-      where: { email },
+    const farmer = await prisma.farmer.findFirst({
+      where: {
+        OR: [
+          email ? { email } : null,
+          phone ? { phone } : null,
+        ].filter(Boolean),
+      },
     });
 
     if (!farmer) {
@@ -132,7 +145,7 @@ router.post('/login', async (req, res) => {
 
     // Generate JWT token
     const token = jwt.sign(
-      { id: farmer.id, email: farmer.email },
+      { id: farmer.id, email: farmer.email, phone: farmer.phone },
       config.JWT_SECRET,
       { expiresIn: config.JWT_EXPIRE_IN }
     );
@@ -144,6 +157,7 @@ router.post('/login', async (req, res) => {
           id: farmer.id,
           name: farmer.name,
           email: farmer.email,
+          phone: farmer.phone,
           verified: farmer.verified,
         },
         token,

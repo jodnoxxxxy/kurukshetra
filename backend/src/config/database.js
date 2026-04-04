@@ -4,12 +4,9 @@ const config = require('./index');
 let prisma;
 
 if (config.NODE_ENV === 'production') {
-  prisma = new PrismaClient({
-    accelerateUrl: config.DATABASE_URL
-  });
+  prisma = new PrismaClient();
 } else {
   prisma = new PrismaClient({
-    accelerateUrl: config.DATABASE_URL,
     log: ['query', 'info', 'warn', 'error'],
   });
 }
@@ -20,7 +17,7 @@ async function connectDB() {
     console.log('✅ PostgreSQL connected successfully');
   } catch (error) {
     console.error('❌ Database connection error:', error.message);
-    process.exit(1);
+    throw error;
   }
 }
 

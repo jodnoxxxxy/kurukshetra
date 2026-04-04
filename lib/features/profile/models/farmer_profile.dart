@@ -59,9 +59,7 @@ class FarmerProfile {
       organicScore: (json['organicScore'] ?? 0.0).toDouble(),
       organicStatus: json['organicStatus'] ?? 'Not Certified',
       farmerId: json['farmerId'] ?? 'FARM-PENDING',
-      memberSince: json['createdAt'] != null 
-          ? (json['createdAt'] as dynamic).toDate() 
-          : DateTime.now(),
+      memberSince: DateTime.tryParse(json['createdAt'] ?? '') ?? DateTime.now(),
       preferredLanguage: json['preferredLanguage'] ?? 'English',
       notificationPreferences: json['notificationPreferences'] != null 
           ? Map<String, bool>.from(json['notificationPreferences']) 
@@ -172,7 +170,7 @@ class LandRecord {
       district: json['district'] ?? '',
       state: json['state'] ?? '',
       documents: json['documents'] != null ? List<String>.from(json['documents']) : [],
-      createdAt: json['createdAt'] != null ? (json['createdAt'] as dynamic).toDate() : DateTime.now(),
+      createdAt: DateTime.tryParse(json['createdAt'] ?? '') ?? DateTime.now(),
     );
   }
 
@@ -243,8 +241,8 @@ class CropHistory {
       season: json['season'] ?? '',
       cropYield: (json['cropYield'] ?? 0.0).toDouble(),
       profit: (json['profit'] ?? 0.0).toDouble(),
-      plantingDate: json['plantingDate'] != null ? (json['plantingDate'] as dynamic).toDate() : DateTime.now(),
-      harvestDate: json['harvestDate'] != null ? (json['harvestDate'] as dynamic).toDate() : DateTime.now(),
+      plantingDate: DateTime.tryParse(json['plantingDate'] ?? '') ?? DateTime.now(),
+      harvestDate: DateTime.tryParse(json['harvestDate'] ?? '') ?? DateTime.now(),
       area: (json['area'] ?? 0.0).toDouble(),
     );
   }
@@ -368,7 +366,7 @@ class PaymentTransaction {
       amount: (json['amount'] ?? 0.0).toDouble(),
       type: json['type'] ?? 'credit',
       description: json['description'] ?? '',
-      date: json['date'] != null ? (json['date'] as dynamic).toDate() : DateTime.now(),
+      date: DateTime.tryParse(json['date'] ?? '') ?? DateTime.now(),
       status: json['status'] ?? 'completed',
     );
   }

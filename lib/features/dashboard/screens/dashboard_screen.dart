@@ -9,6 +9,10 @@ import 'package:kurukshetra/core/widgets/list_tile_card.dart';
 import 'package:kurukshetra/l10n/app_localizations.dart';
 import 'package:kurukshetra/core/utils/l10n_utils.dart';
 import '../providers/dashboard_provider.dart';
+import 'package:kurukshetra/features/home/providers/crop_provider.dart';
+import 'package:kurukshetra/features/ai/soil/screens/soil_analysis_screen.dart';
+import 'package:kurukshetra/features/ai/pest/screens/pest_detection_screen.dart';
+import 'package:kurukshetra/features/home/screens/add_crop_screen.dart';
 
 class FarmerDashboardScreen extends ConsumerStatefulWidget {
   const FarmerDashboardScreen({super.key});
@@ -35,13 +39,34 @@ class _FarmerDashboardScreenState extends ConsumerState<FarmerDashboardScreen> {
               children: [
                  _buildStatsRow(context, state, l10n),
                 const SizedBox(height: 32),
-                SectionHeader(title: 'My Crops', icon: Icons.agriculture_rounded),
+                SectionHeader(
+                  title: 'My Crops', 
+                  icon: Icons.agriculture_rounded,
+                  onTrailingTap: () {
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => const AddCropScreen()));
+                  },
+                  trailingLabel: 'ADD',
+                ),
                 _buildMyCrops(context, state.activeCrops, l10n),
                 const SizedBox(height: 32),
-                SectionHeader(title: 'Crop Health', icon: Icons.health_and_safety_rounded),
+                SectionHeader(
+                  title: 'Crop Health', 
+                  icon: Icons.health_and_safety_rounded,
+                  onTrailingTap: () {
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => const PestDetectionScreen()));
+                  },
+                  trailingLabel: 'VIEW ALL',
+                ),
                 _buildCropHealth(context, state.cropHealthOverview),
                 const SizedBox(height: 32),
-                SectionHeader(title: 'Soil Health', icon: Icons.grass_rounded, onTrailingTap: () {}, trailingLabel: 'VIEW FULL'),
+                SectionHeader(
+                  title: 'Soil Health', 
+                  icon: Icons.grass_rounded, 
+                  onTrailingTap: () {
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => const SoilAnalysisScreen()));
+                  }, 
+                  trailingLabel: 'VIEW FULL'
+                ),
                 _buildSoilHealth(context, state.soilHealth, l10n),
                 const SizedBox(height: 32),
                 SectionHeader(title: 'Market Snapshot', icon: Icons.trending_up_rounded),
@@ -134,46 +159,56 @@ class _FarmerDashboardScreenState extends ConsumerState<FarmerDashboardScreen> {
   }
 
   Widget _buildStatsRow(BuildContext context, FarmerDashboardState state, AppLocalizations l10n) {
-    return Row(
-      children: [
-        Expanded(
-          child: AppCard(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(color: Colors.green.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(12)),
-                  child: const Icon(Icons.eco_rounded, color: Colors.green, size: 20),
-                ),
-                const SizedBox(height: 16),
-                Text('${state.organicScore.toInt()}%', style: AppTextStyles.h2.copyWith(color: Colors.green)),
-                Text('Organic Score', style: AppTextStyles.labelCaps.copyWith(fontSize: 9)),
-              ],
-            ),
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      physics: const BouncingScrollPhysics(),
+      child: Row(
+        children: [
+          // Organic Score
+          _buildCompactStat(
+            icon: Icons.eco_rounded,
+            color: Colors.green,
+            value: '${state.organicScore.toInt()}%',
+            label: 'Organic Score',
           ),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: AppCard(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(color: Colors.blue.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(12)),
-                  child: const Icon(Icons.payments_rounded, color: Colors.blue, size: 20),
-                ),
-                const SizedBox(height: 16),
-                Text('₹${(state.expectedProfit / 1000).toStringAsFixed(1)}k', style: AppTextStyles.h2.copyWith(color: Colors.blue)),
-                Text('Est. Profit', style: AppTextStyles.labelCaps.copyWith(fontSize: 9)),
-              ],
-            ),
+          const SizedBox(width: 12),
+          // Total Investment
+          _buildCompactStat(
+            icon: Icons.account_balance_wallet_rounded,
+            color: Colors.orange,
+            value: '₹${(state.totalInvestment / 1000).toStringAsFixed(1)}k',
+            label: 'Investment',
           ),
-        ),
-      ],
+          const SizedBox(width: 12),
+          // Est. Profit
+          _buildCompactStat(
+            icon: Icons.trending_up_rounded,
+            color: Colors.blue,
+            value: '₹${(state.expectedProfit / 1000).toStringAsFixed(1)}k',
+            label: 'Est. Profit',
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCompactStat({required IconData icon, required Color color, required String value, required String label}) {
+    return AppCard(
+      width: 140,
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(6),
+            decoration: BoxDecoration(color: color.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10)),
+            child: Icon(icon, color: color, size: 18),
+          ),
+          const SizedBox(height: 12),
+          Text(value, style: AppTextStyles.h2.copyWith(color: color, fontSize: 18)),
+          Text(label, style: AppTextStyles.labelCaps.copyWith(fontSize: 8)),
+        ],
+      ),
     );
   }
 
@@ -186,27 +221,47 @@ class _FarmerDashboardScreenState extends ConsumerState<FarmerDashboardScreen> {
         itemCount: crops.length,
         itemBuilder: (ctx, i) {
           final c = crops[i];
-          return AppCard(
-            width: 160,
-            margin: const EdgeInsets.only(right: 16),
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Row(
+          return Stack(
+            children: [
+              AppCard(
+                width: 160,
+                margin: const EdgeInsets.only(right: 16),
+                padding: const EdgeInsets.fromLTRB(16, 20, 16, 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(c['icon'], style: const TextStyle(fontSize: 22)),
-                    const SizedBox(width: 10),
-                    Expanded(child: Text(L10nUtils.translateCrop(context, c['name']), style: AppTextStyles.bodyBold, overflow: TextOverflow.ellipsis)),
+                    Row(
+                      children: [
+                        Text(c['icon'], style: const TextStyle(fontSize: 22)),
+                        const SizedBox(width: 10),
+                        Expanded(child: Text(L10nUtils.translateCrop(context, c['name']), style: AppTextStyles.bodyBold, overflow: TextOverflow.ellipsis)),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Text('Stage: ${c['stage']}', style: AppTextStyles.bodySmall),
+                    const SizedBox(height: 4),
+                    StatusBadge(label: 'Day ${c['days']}', statusType: StatusType.success),
                   ],
                 ),
-                const SizedBox(height: 12),
-                Text('Stage: ${c['stage']}', style: AppTextStyles.bodySmall),
-                const SizedBox(height: 4),
-                StatusBadge(label: 'Day ${c['days']}', statusType: StatusType.success),
-              ],
-            ),
+              ),
+              Positioned(
+                right: 20,
+                top: 4,
+                child: IconButton(
+                  icon: const Icon(Icons.close_rounded, size: 16, color: Colors.red),
+                  onPressed: () {
+                    // We need to find the real ID from the backend listing if possible,
+                    // but for Dashboard state we'll assume it exists in myCropProvider.
+                    // If we don't have id in dashboard state, we'll need to add it.
+                    if (c['id'] != null) {
+                      ref.read(myCropProvider.notifier).deleteCrop(c['id']);
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Removing crop...')));
+                    }
+                  },
+                ),
+              ),
+            ],
           );
         },
       ),

@@ -17,6 +17,14 @@ const soilAnalysisSchema = Joi.object({
   farmId: Joi.string().uuid().optional(),
 });
 
+// Validation schema for crop recommendation
+const cropRecommendationSchema = Joi.object({
+  soilType: Joi.string().required(),
+  waterAvailability: Joi.string().valid('Low', 'Medium', 'High').required(),
+  temp: Joi.number().required(),
+  season: Joi.string().valid('Kharif', 'Rabi', 'Summer').required(),
+});
+
 // POST /api/v1/ai/soil-analysis
 router.post('/soil-analysis', async (req, res) => {
   try {
@@ -184,6 +192,93 @@ function identifyDeficiencies(n, p, k, ph) {
   if (ph > 7.5) deficiencies.push('Alkalinity');
   
   return deficiencies;
+}
+
+// POST /api/v1/ai/crop-recommendation
+router.post('/crop-recommendation', async (req, res) => {
+  try {
+    const { error } = cropRecommendationSchema.validate(req.body);
+    if (error) {
+      return res.status(400).json({
+        status: 'error',
+        message: error.details[0].message,
+      });
+    }
+
+    const { soilType, waterAvailability, temp, season } = req.body;
+
+    // Logic for recommendation (can be replaced with AI service call)
+    const recommendations = generateCropRecommendations(soilType, waterAvailability, temp, season);
+
+    res.status(200).json({
+      status: 'success',
+      data: recommendations,
+    });
+  } catch (error) {
+    logger.error('Crop recommendation error:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to generate crop recommendations',
+    });
+  }
+});
+
+function generateCropRecommendations(soilType, water, temp, season) {
+  const allCrops = [
+    {
+      name: 'Rice',
+      reason: 'Suitable for high water availability and alluvial soil.',
+      description: 'Rice is the most important staple food crop of India.',
+      imageUrl: 'https://images.unsplash.com/photo-1536633100227-2300bcfd01e6?q=80&w=400&auto=format&fit=crop',
+      steps: getGeneralSteps('Rice'),
+    },
+    {
+      name: 'Wheat',
+      reason: 'Perfect for Rabi season and moderate temperature.',
+      description: 'Wheat is the second most important cereal crop in India.',
+      imageUrl: 'https://images.unsplash.com/photo-1501438901235-5b4d7938384b?q=80&w=400&auto=format&fit=crop',
+      steps: getGeneralSteps('Wheat'),
+    },
+    {
+      name: 'Cotton',
+      reason: 'Grows well in black soil with high temperature.',
+      description: 'Cotton is one of the most important fiber and cash crops of India.',
+      imageUrl: 'https://images.unsplash.com/photo-1594904351111-a072f80b1a71?q=80&w=400&auto=format&fit=crop',
+      steps: getGeneralSteps('Cotton'),
+    },
+    {
+      name: 'Maize',
+      reason: 'Versatile crop suitable for various soil types.',
+      description: 'Maize is known as the queen of cereals.',
+      imageUrl: 'https://images.unsplash.com/photo-1551730459-92db2a308d6a?q=80&w=400&auto=format&fit=crop',
+      steps: getGeneralSteps('Maize'),
+    },
+  ];
+
+  let recommended = [];
+  if (soilType.toLowerCase().includes('black')) recommended.push(allCrops[2]);
+  if (water === 'High') recommended.push(allCrops[0]);
+  if (season === 'Rabi') recommended.push(allCrops[1]);
+
+  if (recommended.length < 3) {
+    for (const crop of allCrops) {
+      if (!recommended.find(r => r.name === crop.name)) {
+        recommended.push(crop);
+      }
+      if (recommended.length === 3) break;
+    }
+  }
+
+  return recommended.slice(0, 3);
+}
+
+function getGeneralSteps(cropName) {
+  return [
+    { title: 'Land Preparation', description: `Plough the field for ${cropName}.`, durationDays: 7, icon: 'agriculture' },
+    { title: 'Sowing', description: `Sow ${cropName} seeds properly.`, durationDays: 2, icon: 'grain' },
+    { title: 'Irrigation', description: 'Water as needed.', durationDays: 90, icon: 'waves' },
+    { title: 'Harvesting', description: `Harvest ${cropName} when ripe.`, durationDays: 10, icon: 'content_cut' },
+  ];
 }
 
 module.exports = router;

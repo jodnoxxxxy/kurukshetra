@@ -1,0 +1,143 @@
+# AI/ML Configuration
+# This file configures all ML models and training parameters
+
+# Database Configuration
+database:
+  # MySQL for structured data
+  mysql:
+    host: localhost
+    port: 3306
+    user: root
+    password: ${DB_PASSWORD}
+    database: kurukshetra_ml
+  
+  # Firebase for real-time sync
+  firebase:
+    project_id: ${FIREBASE_PROJECT_ID}
+    api_key: ${FIREBASE_API_KEY}
+    storage_bucket: ${FIREBASE_STORAGE_BUCKET}
+
+# Model Configuration
+models:
+  # Crop Recommendation Model
+  crop_recommendation:
+    type: gradient_boosting
+    algorithm: xgboost
+    input_features: 12
+    output_classes: 45  # Number of crop types
+    hyperparameters:
+      n_estimators: 200
+      max_depth: 8
+      learning_rate: 0.1
+      subsample: 0.8
+
+  # Yield Prediction Model
+  yield_prediction:
+    type: neural_network
+    framework: tensorflow
+    layers: [128, 64, 32, 1]
+    activation: relu
+    output_activation: linear
+    loss: mse
+    optimizer: adam
+    learning_rate: 0.001
+    epochs: 100
+    batch_size: 32
+
+  # Disease Detection Model
+  disease_detection:
+    type: convolutional_neural_network
+    framework: tensorflow
+    input_shape: [224, 224, 3]
+    pre_trained_model: mobilenetv2
+    classes: 8  # Disease types
+    threshold: 0.7
+    epochs: 50
+    batch_size: 16
+
+  # Weather Analysis Model
+  weather_analysis:
+    type: time_series
+    algorithm: arima
+    order: [5, 1, 2]  # (p, d, q)
+    forecast_days: 7
+
+# Training Configuration
+training:
+  test_split: 0.2
+  validation_split: 0.1
+  random_state: 42
+  shuffle: true
+  cross_validation_folds: 5
+
+# Data Configuration
+data:
+  # Raw data location
+  raw_path: ./data/raw/
+  processed_path: ./data/processed/
+  
+  # Data parameters
+  missing_value_strategy: mean
+  outlier_detection: iqr
+  scaling: standardscaler
+  
+  # Feature engineering
+  create_interactions: true
+  polynomial_features: false
+  feature_selection: true
+  n_features: 15
+
+# API Configuration
+api:
+  host: 0.0.0.0
+  port: 5001
+  debug: false
+  workers: 4
+  framework: flask  # or fastapi
+  timeout: 30
+
+# Logging Configuration
+logging:
+  level: INFO
+  format: json
+  output: console  # or file
+  log_file: ./logs/ml_service.log
+  max_file_size: 10485760  # 10MB
+  backup_count: 5
+
+# Performance & Optimization
+performance:
+  use_gpu: true
+  batch_size: 32
+  num_workers: 4
+  cache_models: true
+  model_cache_path: ./models/.cache/
+
+# Monitoring & Evaluation
+monitoring:
+  track_metrics: true
+  metrics_port: 8000
+  alert_threshold: 0.05  # Performance drop threshold
+  retrain_frequency: 7  # Days
+
+# Model Versioning
+versioning:
+  strategy: semantic  # or timestamp
+  store_location: ./models/versions/
+  keep_best_n: 3
+  auto_archive: true
+
+# Security & Privacy
+security:
+  validate_input: true
+  sanitize_predictions: true
+  encrypt_storage: false
+  data_retention_days: 365
+
+# Deployment
+deployment:
+  target: docker  # docker, aws, gcp, azure
+  export_format: saved_model  # saved_model, onnx, tflite
+  compression: true
+  quantization: false
+  edge_deployment: true  # For mobile/edge

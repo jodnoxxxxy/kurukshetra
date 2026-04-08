@@ -12,34 +12,162 @@
 .swiftpm/
 migrate_working_dir/
 
+# Environment Variables
+.env
+.env.local
+.env.*.local
+.env.production
+
 # IntelliJ related
 *.iml
 *.ipr
 *.iws
 .idea/
 
-# The .vscode folder contains launch configuration and tasks you configure in
-# VS Code which you may wish to be included in version control, so this line
-# is commented out by default.
-#.vscode/
+# VS Code
+.vscode/
+*.code-workspace
 
-# Flutter/Dart/Pub related
+# Flutter/Dart related
 **/doc/api/
 **/ios/Flutter/.last_build_id
 .dart_tool/
 .flutter-plugins-dependencies
 .pub-cache/
 .pub/
-/build/
-/coverage/
+pubspec.lock
+/.packages
+coverage/
+.packages
 
-# Symbolication related
+# Frontend specific
+frontend/build/
+frontend/.dart_tool/
+frontend/.flutter-plugins
+frontend/.flutter-plugins-dependencies
+frontend/.fvm/
+frontend/coverage/
+frontend/.packages
+frontend/pods/
+frontend/Podfile.lock
+frontend/web/flutter_service_worker.js
+
+# Android
+frontend/android/.gradle/
+frontend/android/build/
+frontend/android/local.properties
+frontend/android/.metadata
+frontend/android/captures/
+
+# iOS
+frontend/ios/Pods/
+frontend/ios/Podfile.lock
+frontend/ios/.metadata
+frontend/ios/Flutter/Flutter.framework
+frontend/ios/Flutter/Flutter.podspec
+frontend/ios/GeneratedPluginRegistrant.*
+
+# macOS
+frontend/macos/Pods/
+frontend/macos/Podfile.lock
 app.*.symbols
-
-# Obfuscation related
 app.*.map.json
 
 # Android Studio will place build artifacts here
 /android/app/debug
 /android/app/profile
 /android/app/release
+backend/node_modules/
+backend/dist/
+backend/build/
+backend/.coverage/
+backend/coverage/
+backend/.nyc_output/
+backend/npm-debug.log*
+backend/yarn-debug.log*
+backend/yarn-error.log*
+backend/logs/
+backend/uploads/
+backend/tmp/
+backend/*.log
+backend/pm2.log
+
+# Database
+database/backups/
+database/*.dump
+database/*.sql.bak
+postgres_data/
+pgdata/
+
+# Docker
+docker-compose.override.yml
+.dockerignore
+
+# Build artifacts
+build/
+dist/
+*.apk
+*.aab
+*.ipa
+*.app
+*.dmg
+*.exe
+*.msi
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Temporary
+*.tmp
+*.temp
+*.bak
+*.backup
+*~
+
+# Lock files (keep if using strict versioning)
+# frontend/pubspec.lock
+# backend/package-lock.json
+
+# Documentation build
+docs/_build/
+site/
+
+# Testing
+.pytest_cache/
+.coverage
+
+# Yarn
+yarn-error.log
+
+# Private files
+*.pem
+*.key
+*.crt
+credentials.json
+service-account.json
+
+# Firebase
+firebase-debug.log
+.firebaserc
+
+# IDE temp
+.ProjectSettings.json
+
+# Generated
+*.generated.dart
+*.g.dart
+
+# Virtual environments
+venv/
+env/
+.venv
+
+# Python
+__pycache__/
+*.pyo
+*.pyd
+
+# Qoder
+.qoder/

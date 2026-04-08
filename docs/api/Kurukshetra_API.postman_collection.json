@@ -1,0 +1,967 @@
+{
+  "info": {
+    "_postman_id": "kurukshetra-api-collection",
+    "name": "Kurukshetra Backend API",
+    "description": "Complete API testing collection for Kurukshetra Smart Farming App",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{jwt_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "Health & Server",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:5000/health",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["health"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Register User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"email\": \"john@example.com\",\n  \"phone\": \"9876543210\",\n  \"password\": \"password123\",\n  \"role\": \"FARMER\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:5000/api/v1/auth/register",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "v1", "auth", "register"]
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john@example.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:5000/api/v1/auth/login",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "v1", "auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Get Profile",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:5000/api/v1/auth/profile",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "v1", "auth", "profile"]
+            }
+          }
+        },
+        {
+          "name": "Update Profile",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Jane\",\n  \"lastName\": \"Smith\",\n  \"phone\": \"9876543211\",\n  \"location\": \"Karnataka, India\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:5000/api/v1/auth/profile",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "v1", "auth", "profile"]
+            }
+          }
+        },
+        {
+          "name": "Change Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"oldPassword\": \"password123\",\n  \"newPassword\": \"newpassword456\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:5000/api/v1/auth/change-password",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "v1", "auth", "change-password"]
+            }
+          }
+        },
+        {
+          "name": "Get Preferences",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:5000/api/v1/auth/preferences",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "v1", "auth", "preferences"]
+            }
+          }
+        },
+        {
+          "name": "Update Preferences",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"weatherAlerts\": true,\n  \"diseaseAlerts\": true,\n  \"priceAlerts\": true,\n  \"language\": \"en\",\n  \"theme\": \"light\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:5000/api/v1/auth/preferences",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "v1", "auth", "preferences"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Farm Management",
+      "item": [
+        {
+          "name": "Create Farm",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Green Field Farm\",\n  \"description\": \"My first organic farm\",\n  \"totalArea\": 10.5,\n  \"soilType\": \"Loamy\",\n  \"location\": \"Maharashtra, India\",\n  \"latitude\": 19.0760,\n  \"longitude\": 72.8777\n}"
+            },
+            "url": {
+              "raw": "http://localhost:5000/api/v1/farms",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "v1", "farms"]
+            }
+          }
+        },
+        {
+          "name": "Get All Farms",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:5000/api/v1/farms",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "v1", "farms"]
+            }
+          }
+        },
+        {
+          "name": "Get Farm by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:5000/api/v1/farms/{{farm_id}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "v1", "farms", "{{farm_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Update Farm",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Green Field Farm - Updated\",\n  \"description\": \"Updated farm description\",\n  \"totalArea\": 12.5\n}"
+            },
+            "url": {
+              "raw": "http://localhost:5000/api/v1/farms/{{farm_id}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "v1", "farms", "{{farm_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Get Farm Overview",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:5000/api/v1/farms/{{farm_id}}/overview",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "v1", "farms", "{{farm_id}}", "overview"]
+            }
+          }
+        },
+        {
+          "name": "Delete Farm",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:5000/api/v1/farms/{{farm_id}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "v1", "farms", "{{farm_id}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Crop Management",
+      "item": [
+        {
+          "name": "Create Crop",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Wheat\",\n  \"scientificName\": \"Triticum aestivum\",\n  \"category\": \"Cereal\",\n  \"growingPeriod\": 120,\n  \"minTemperature\": 10,\n  \"maxTemperature\": 30,\n  \"rainfallRequired\": 450,\n  \"optimalPH\": 6.5,\n  \"fieldId\": \"{{field_id}}\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:5000/api/v1/crops",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "v1", "crops"]
+            }
+          }
+        },
+        {
+          "name": "Get All Crops",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:5000/api/v1/crops",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "v1", "crops"]
+            }
+          }
+        },
+        {
+          "name": "Get Crop by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:5000/api/v1/crops/{{crop_id}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "v1", "crops", "{{crop_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Get Crop by Name",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:5000/api/v1/crops/name/Wheat",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "v1", "crops", "name", "Wheat"]
+            }
+          }
+        },
+        {
+          "name": "Search Crops",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:5000/api/v1/crops/search?q=rice",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "v1", "crops", "search"],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "rice"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Crop",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"growingPeriod\": 125,\n  \"maxTemperature\": 32\n}"
+            },
+            "url": {
+              "raw": "http://localhost:5000/api/v1/crops/{{crop_id}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "v1", "crops", "{{crop_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Get Crop Guidelines",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:5000/api/v1/crops/{{crop_id}}/guidelines",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "v1", "crops", "{{crop_id}}", "guidelines"]
+            }
+          }
+        },
+        {
+          "name": "Add Crop Guideline",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"stage\": \"Seedling\",\n  \"action\": \"Apply nitrogen fertilizer\",\n  \"duration\": 14\n}"
+            },
+            "url": {
+              "raw": "http://localhost:5000/api/v1/crops/{{crop_id}}/guidelines",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "v1", "crops", "{{crop_id}}", "guidelines"]
+            }
+          }
+        },
+        {
+          "name": "Delete Crop",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:5000/api/v1/crops/{{crop_id}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "v1", "crops", "{{crop_id}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Monitoring",
+      "item": [
+        {
+          "name": "Create Monitoring Record",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"temperature\": 28.5,\n  \"humidity\": 65,\n  \"soilMoisture\": 55,\n  \"soilPH\": 6.8,\n  \"nLevel\": 120,\n  \"pLevel\": 25,\n  \"kLevel\": 150,\n  \"observations\": \"Good growth observed\",\n  \"fieldId\": \"{{field_id}}\",\n  \"cropId\": \"{{crop_id}}\",\n  \"recordedBy\": \"Farmer\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:5000/api/v1/monitoring",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "v1", "monitoring"]
+            }
+          }
+        },
+        {
+          "name": "Get All Monitoring Records",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:5000/api/v1/monitoring",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "v1", "monitoring"]
+            }
+          }
+        },
+        {
+          "name": "Get Monitoring by Field",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:5000/api/v1/monitoring/field/{{field_id}}?limit=30",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "v1", "monitoring", "field", "{{field_id}}"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "30"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Monitoring by Crop",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:5000/api/v1/monitoring/crop/{{crop_id}}?limit=30",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "v1", "monitoring", "crop", "{{crop_id}}"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "30"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Field Statistics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:5000/api/v1/monitoring/statistics/{{field_id}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "v1", "monitoring", "statistics", "{{field_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Get Alerts",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:5000/api/v1/monitoring/alerts/{{field_id}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "v1", "monitoring", "alerts", "{{field_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Update Monitoring Record",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"temperature\": 29.0,\n  \"humidity\": 68\n}"
+            },
+            "url": {
+              "raw": "http://localhost:5000/api/v1/monitoring/{{monitoring_id}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "v1", "monitoring", "{{monitoring_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Search Monitoring by Date Range",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"startDate\": \"2024-01-01T00:00:00Z\",\n  \"endDate\": \"2024-12-31T23:59:59Z\",\n  \"fieldId\": \"{{field_id}}\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:5000/api/v1/monitoring/search",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "v1", "monitoring", "search"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Disease Detection",
+      "item": [
+        {
+          "name": "Create Disease Detection",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"diseaseName\": \"Leaf Blight\",\n  \"severity\": \"MODERATE\",\n  \"affectedArea\": 25,\n  \"symptoms\": \"Brown spots on leaves\",\n  \"treatment\": \"Apply fungicide\",\n  \"imageUrl\": \"https://example.com/disease.jpg\",\n  \"detectedBy\": \"AI Model\",\n  \"fieldId\": \"{{field_id}}\",\n  \"cropId\": \"{{crop_id}}\",\n  \"recommendation\": \"Apply fungicide within 48 hours\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:5000/api/v1/diseases",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "v1", "diseases"]
+            }
+          }
+        },
+        {
+          "name": "Get All Diseases",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:5000/api/v1/diseases",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "v1", "diseases"]
+            }
+          }
+        },
+        {
+          "name": "Get Disease by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:5000/api/v1/diseases/{{disease_id}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "v1", "diseases", "{{disease_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Get Diseases by Field",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:5000/api/v1/diseases/field/{{field_id}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "v1", "diseases", "field", "{{field_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Get Diseases by Crop",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:5000/api/v1/diseases/crop/{{crop_id}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "v1", "diseases", "crop", "{{crop_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Get High Severity Diseases",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:5000/api/v1/diseases/high-severity",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "v1", "diseases", "high-severity"]
+            }
+          }
+        },
+        {
+          "name": "Get Disease Statistics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:5000/api/v1/diseases/statistics",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "v1", "diseases", "statistics"]
+            }
+          }
+        },
+        {
+          "name": "Get Disease by Name",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:5000/api/v1/diseases/name/Leaf%20Blight",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "v1", "diseases", "name", "Leaf%20Blight"]
+            }
+          }
+        },
+        {
+          "name": "Get Treatment Recommendations",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:5000/api/v1/diseases/treatment/Leaf%20Blight",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "v1", "diseases", "treatment", "Leaf%20Blight"]
+            }
+          }
+        },
+        {
+          "name": "Update Disease Detection",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"severity\": \"SEVERE\",\n  \"affectedArea\": 50\n}"
+            },
+            "url": {
+              "raw": "http://localhost:5000/api/v1/diseases/{{disease_id}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "v1", "diseases", "{{disease_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Search Diseases by Date Range",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"startDate\": \"2024-01-01T00:00:00Z\",\n  \"endDate\": \"2024-12-31T23:59:59Z\",\n  \"fieldId\": \"{{field_id}}\",\n  \"severity\": \"SEVERE\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:5000/api/v1/diseases/search",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "v1", "diseases", "search"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Orders",
+      "item": [
+        {
+          "name": "Create Order",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\"userId\": \"{{user_id}}\", \"cropName\": \"Wheat\", \"quantity\": 50, \"unit\": \"kg\", \"pricePerUnit\": 20, \"description\": \"Fresh wheat\", \"deliveryLocation\": \"Bangalore\"}"},
+            "url": {"raw": "http://localhost:5000/api/v1/orders", "protocol": "http", "host": ["localhost"], "port": "5000", "path": ["api", "v1", "orders"]}
+          }
+        },
+        {
+          "name": "Get All Orders",
+          "request": {"method": "GET", "url": {"raw": "http://localhost:5000/api/v1/orders", "protocol": "http", "host": ["localhost"], "port": "5000", "path": ["api", "v1", "orders"]}}
+        },
+        {
+          "name": "Get Order by ID",
+          "request": {"method": "GET", "url": {"raw": "http://localhost:5000/api/v1/orders/{{order_id}}", "protocol": "http", "host": ["localhost"], "port": "5000", "path": ["api", "v1", "orders", "{{order_id}}"]}}
+        },
+        {
+          "name": "Get Orders by User",
+          "request": {"method": "GET", "url": {"raw": "http://localhost:5000/api/v1/orders/user/{{user_id}}", "protocol": "http", "host": ["localhost"], "port": "5000", "path": ["api", "v1", "orders", "user", "{{user_id}}"]}}
+        },
+        {
+          "name": "Get Orders by Status",
+          "request": {"method": "GET", "url": {"raw": "http://localhost:5000/api/v1/orders/status/PENDING", "protocol": "http", "host": ["localhost"], "port": "5000", "path": ["api", "v1", "orders", "status", "PENDING"]}}
+        },
+        {
+          "name": "Update Order",
+          "request": {"method": "PUT", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"status\": \"CONFIRMED\", \"quantity\": 60}"}, "url": {"raw": "http://localhost:5000/api/v1/orders/{{order_id}}", "protocol": "http", "host": ["localhost"], "port": "5000", "path": ["api", "v1", "orders", "{{order_id}}"]}}
+        },
+        {
+          "name": "Get Orders Statistics",
+          "request": {"method": "GET", "url": {"raw": "http://localhost:5000/api/v1/orders/statistics", "protocol": "http", "host": ["localhost"], "port": "5000", "path": ["api", "v1", "orders", "statistics"]}}
+        },
+        {
+          "name": "Search Orders",
+          "request": {"method": "GET", "url": {"raw": "http://localhost:5000/api/v1/orders/search/Wheat", "protocol": "http", "host": ["localhost"], "port": "5000", "path": ["api", "v1", "orders", "search", "Wheat"]}}
+        },
+        {
+          "name": "Delete Order",
+          "request": {"method": "DELETE", "url": {"raw": "http://localhost:5000/api/v1/orders/{{order_id}}", "protocol": "http", "host": ["localhost"], "port": "5000", "path": ["api", "v1", "orders", "{{order_id}}"]}}
+        }
+      ]
+    },
+    {
+      "name": "Notifications",
+      "item": [
+        {
+          "name": "Create Notification",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\"userId\": \"{{user_id}}\", \"title\": \"New Order\", \"message\": \"You have a new order\", \"type\": \"INFO\"}"},
+            "url": {"raw": "http://localhost:5000/api/v1/notifications", "protocol": "http", "host": ["localhost"], "port": "5000", "path": ["api", "v1", "notifications"]}
+          }
+        },
+        {
+          "name": "Get User Notifications",
+          "request": {"method": "GET", "url": {"raw": "http://localhost:5000/api/v1/notifications?userId={{user_id}}", "protocol": "http", "host": ["localhost"], "port": "5000", "path": ["api", "v1", "notifications"], "query": [{"key": "userId", "value": "{{user_id}}"}]}}
+        },
+        {
+          "name": "Get Unread Notifications",
+          "request": {"method": "GET", "url": {"raw": "http://localhost:5000/api/v1/notifications?userId={{user_id}}&unreadOnly=true", "protocol": "http", "host": ["localhost"], "port": "5000", "path": ["api", "v1", "notifications"], "query": [{"key": "userId", "value": "{{user_id}}"}, {"key": "unreadOnly", "value": "true"}]}}
+        },
+        {
+          "name": "Mark as Read",
+          "request": {"method": "PUT", "url": {"raw": "http://localhost:5000/api/v1/notifications/{{notification_id}}/read", "protocol": "http", "host": ["localhost"], "port": "5000", "path": ["api", "v1", "notifications", "{{notification_id}}", "read"]}}
+        },
+        {
+          "name": "Mark All as Read",
+          "request": {"method": "PUT", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"userId\": \"{{user_id}}\"}"}, "url": {"raw": "http://localhost:5000/api/v1/notifications/read-all", "protocol": "http", "host": ["localhost"], "port": "5000", "path": ["api", "v1", "notifications", "read-all"]}}
+        },
+        {
+          "name": "Get Statistics",
+          "request": {"method": "GET", "url": {"raw": "http://localhost:5000/api/v1/notifications/statistics?userId={{user_id}}", "protocol": "http", "host": ["localhost"], "port": "5000", "path": ["api", "v1", "notifications", "statistics"], "query": [{"key": "userId", "value": "{{user_id}}"}]}}
+        },
+        {
+          "name": "Send Bulk Notification",
+          "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"userIds\": [\"user1\", \"user2\"], \"title\": \"Alert\", \"message\": \"Important update\"}"}, "url": {"raw": "http://localhost:5000/api/v1/notifications/bulk", "protocol": "http", "host": ["localhost"], "port": "5000", "path": ["api", "v1", "notifications", "bulk"]}}
+        },
+        {
+          "name": "Delete Notification",
+          "request": {"method": "DELETE", "url": {"raw": "http://localhost:5000/api/v1/notifications/{{notification_id}}", "protocol": "http", "host": ["localhost"], "port": "5000", "path": ["api", "v1", "notifications", "{{notification_id}}"]}}
+        }
+      ]
+    },
+    {
+      "name": "Market & Prices",
+      "item": [
+        {
+          "name": "Record Price",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\"cropName\": \"Rice\", \"price\": 45, \"unit\": \"per_kg\", \"location\": \"Delhi\", \"trend\": \"UP\"}"},
+            "url": {"raw": "http://localhost:5000/api/v1/market/prices", "protocol": "http", "host": ["localhost"], "port": "5000", "path": ["api", "v1", "market", "prices"]}
+          }
+        },
+        {
+          "name": "Get All Prices",
+          "request": {"method": "GET", "url": {"raw": "http://localhost:5000/api/v1/market/prices", "protocol": "http", "host": ["localhost"], "port": "5000", "path": ["api", "v1", "market", "prices"]}}
+        },
+        {
+          "name": "Get Latest Prices",
+          "request": {"method": "GET", "url": {"raw": "http://localhost:5000/api/v1/market/latest?limit=20", "protocol": "http", "host": ["localhost"], "port": "5000", "path": ["api", "v1", "market", "latest"], "query": [{"key": "limit", "value": "20"}]}}
+        },
+        {
+          "name": "Get Price by Crop",
+          "request": {"method": "GET", "url": {"raw": "http://localhost:5000/api/v1/market/prices/crop/Rice", "protocol": "http", "host": ["localhost"], "port": "5000", "path": ["api", "v1", "market", "prices", "crop", "Rice"]}}
+        },
+        {
+          "name": "Get Price Trends",
+          "request": {"method": "GET", "url": {"raw": "http://localhost:5000/api/v1/market/trends/Rice", "protocol": "http", "host": ["localhost"], "port": "5000", "path": ["api", "v1", "market", "trends", "Rice"]}}
+        },
+        {
+          "name": "Get Price Forecast",
+          "request": {"method": "GET", "url": {"raw": "http://localhost:5000/api/v1/market/forecast/Rice", "protocol": "http", "host": ["localhost"], "port": "5000", "path": ["api", "v1", "market", "forecast", "Rice"]}}
+        },
+        {
+          "name": "Get Prices by Location",
+          "request": {"method": "GET", "url": {"raw": "http://localhost:5000/api/v1/market/location/Delhi", "protocol": "http", "host": ["localhost"], "port": "5000", "path": ["api", "v1", "market", "location", "Delhi"]}}
+        },
+        {
+          "name": "Get Market Statistics",
+          "request": {"method": "GET", "url": {"raw": "http://localhost:5000/api/v1/market/statistics", "protocol": "http", "host": ["localhost"], "port": "5000", "path": ["api", "v1", "market", "statistics"]}}
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:5000/api/v1",
+      "type": "string"
+    },
+    {
+      "key": "jwt_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "farm_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "field_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "crop_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "monitoring_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "disease_id",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}

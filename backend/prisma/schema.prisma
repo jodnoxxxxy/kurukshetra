@@ -1,5 +1,5 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
+// Kurukshetra Complete Prisma Schema
+// Database: SQLite (Development) / PostgreSQL (Production)
 
 generator client {
   provider = "prisma-client-js"
@@ -7,144 +7,442 @@ generator client {
 
 datasource db {
   provider = "sqlite"
-  url      = "file:./dev.db"
+  url      = env("DATABASE_URL")
 }
 
-model Farmer {
-  id                String   @id @default(uuid())
-  name              String
-  email             String   @unique
-  phone             String?
-  passwordHash      String   @map("password_hash")
-  location          String?
-  state             String?
-  district          String?
-  village           String?
-  verified          Boolean  @default(false)
-  languagePreference String @default("en") @map("language_preference")
-  createdAt         DateTime @default(now()) @map("created_at")
-  updatedAt         DateTime @updatedAt @map("updated_at")
+// ============================================================
+// AUTH & USER MANAGEMENT
+// ============================================================
 
+model User {
+  id            String     @id @default(cuid())
+  email         String     @unique
+  password      String    
+  phone         String?   
+  firstName     String?   
+  lastName      String?   
+  role          String     @default("FARMER")  // FARMER, ADVISOR, ADMIN, GOVERNMENT_OFFICIAL
+  profileImage  String?
+  location      String?
+  latitude      Float?
+  longitude     Float?
+  verified      Boolean    @default(false)
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  deletedAt     DateTime?
+  
   // Relations
-  farms             Farm[]
-  chatMessages      ChatMessage[]
-  soilAnalyses      SoilAnalysis[]
-  pestDetections    PestDetection[]
+  farms         Farm[]
+  orders        Order[]
+  notifications Notification[]
+  preferences   UserPreferences?
 
-  @@map("farmers")
+  @@index([email])
+  @@index([role])
+  @@index([deletedAt])
 }
+
+model UserPreferences {
+  id                      String   @id @default(cuid())
+  userId                  String   @unique
+  user                    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  weatherAlerts           Boolean  @default(true)
+  diseaseAlerts           Boolean  @default(true)
+  priceAlerts             Boolean  @default(true)
+  recommendationAlerts    Boolean  @default(true)
+  
+  language                String   @default("en")
+  theme                   String   @default("light")
+  timezone                String   @default("UTC")
+  
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+}
+
+// ============================================================
+// FARM & FIELD MANAGEMENT
+// ============================================================
 
 model Farm {
-  id              String    @id @default(uuid())
-  farmerId        String    @map("farmer_id")
-  farmName        String?   @map("farm_name")
-  locationName    String?   @map("location_name")
-  latitude        Float?
-  longitude       Float?
-  areaAcres       Float?    @map("area_acres")
-  soilType        String?   @map("soil_type")
-  irrigationSource String?  @map("irrigation_source")
-  createdAt       DateTime  @default(now()) @map("created_at")
-
+  id            String     @id @default(cuid())
+  userId        String
+  user          User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  name          String    
+  description   String?   
+  totalArea     Float      // hectares
+  soilType      String?
+  location      String?
+  latitude      Float?
+  longitude     Float?
+  
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  deletedAt     DateTime?
+  
   // Relations
-  farmer          Farmer    @relation(fields: [farmerId], references: [id], onDelete: Cascade)
-  crops           Crop[]
-  soilAnalyses    SoilAnalysis[]
+  fields        Field[]
 
-  @@map("farms")
+  @@index([userId])
+  @@index([deletedAt])
 }
+
+model Field {
+  id                  String     @id @default(cuid())
+  farmId              String
+  farm                Farm       @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  
+  name                String    
+  cropId              String?
+  crop                Crop?      @relation(fields: [cropId], references: [id])
+  
+  area                Float      // hectares
+  soilPH              Float?
+  nitrogen            Float?
+  phosphorus          Float?
+  potassium           Float?
+  soilMoisture        Float?
+  
+  plantedDate         DateTime?
+  expectedHarvestDate DateTime?
+  harvested           Boolean    @default(false)
+  harvestDate         DateTime?
+  yield               Float?
+  
+  createdAt           DateTime   @default(now())
+  updatedAt           DateTime   @updatedAt
+  
+  // Relations
+  monitoring          Monitoring[]
+  predictions         Prediction[]
+  diseases            DiseaseDetection[]
+  inspections         CropInspection[]
+
+  @@index([farmId])
+  @@index([cropId])
+}
+
+// ============================================================
+// CROP MANAGEMENT
+// ============================================================
 
 model Crop {
-  id                String    @id @default(uuid())
-  farmId            String    @map("farm_id")
-  cropName          String    @map("crop_name")
-  variety           String?
-  plantingDate      DateTime? @map("planting_date")
-  expectedHarvest   DateTime? @map("expected_harvest")
-  actualHarvest     DateTime? @map("actual_harvest")
-  status            String    @default("planted") // planted, growing, ready, harvested
-  areaPlanted       Float?    @map("area_planted")
-  yieldEstimated    Float?    @map("yield_estimated")
-  yieldActual       Float?    @map("yield_actual")
-  createdAt         DateTime  @default(now()) @map("created_at")
-
+  id              String     @id @default(cuid())
+  name            String     @unique
+  scientificName  String?   
+  category        String?   
+  variety         String?   
+  
+  description     String?   
+  growingPeriod   Int?       // days
+  minTemperature  Float?
+  maxTemperature  Float?
+  rainfallRequired Float?    // mm
+  optimalPH       Float?
+  idealHumidity   Float?
+  waterNeeds      Float?
+  
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+  deletedAt       DateTime?
+  
   // Relations
-  farm              Farm      @relation(fields: [farmId], references: [id], onDelete: Cascade)
-  pestDetections    PestDetection[]
+  fields          Field[]
+  predictions     Prediction[]
+  guidelines      CropGuideline[]
+  monitoring      Monitoring[]
+  diseases        DiseaseDetection[]
+  inspections     CropInspection[]
 
-  @@map("crops")
+  @@index([name])
+  @@index([deletedAt])
 }
+
+model CropGuideline {
+  id            String     @id @default(cuid())
+  cropId        String
+  crop          Crop       @relation(fields: [cropId], references: [id], onDelete: Cascade)
+  
+  title         String?   
+  content       String?   
+  imageUrl      String?
+  stage         String?   
+  action        String?   
+  duration      Int?       // days
+  
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  deletedAt     DateTime?
+  
+  @@index([cropId])
+  @@index([deletedAt])
+}
+
+// ============================================================
+// MONITORING & SENSOR DATA
+// ============================================================
+
+model Monitoring {
+  id              String     @id @default(cuid())
+  
+  fieldId         String
+  field           Field      @relation(fields: [fieldId], references: [id], onDelete: Cascade)
+  
+  cropId          String
+  crop            Crop       @relation(fields: [cropId], references: [id], onDelete: Cascade)
+  
+  // Sensor Data
+  temperature     Float?
+  humidity        Float?
+  soilMoisture    Float?
+  soilPH          Float?
+  nLevel          Float?
+  pLevel          Float?
+  kLevel          Float?
+  nitrogen        Float?
+  phosphorus      Float?
+  potassium       Float?
+  
+  // Weather
+  rainfall        Float?
+  windSpeed       Float?
+  
+  // Observation
+  observations    String?   
+  notes           String?   
+  photoUrl        String?
+  imageUrl        String?
+  recordedBy      String?   
+  
+  recordedAt      DateTime   @default(now())
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+  deletedAt       DateTime?
+  
+  @@index([fieldId])
+  @@index([cropId])
+  @@index([recordedAt])
+  @@index([deletedAt])
+}
+
+// ============================================================
+// AI/ML PREDICTIONS
+// ============================================================
+
+model Prediction {
+  id              String     @id @default(cuid())
+  fieldId         String
+  field           Field      @relation(fields: [fieldId], references: [id], onDelete: Cascade)
+  
+  cropId          String?
+  crop            Crop?      @relation(fields: [cropId], references: [id], onDelete: SetNull)
+  
+  inspectionId    String?
+  inspection      CropInspection?  @relation("InspectionPredictions", fields: [inspectionId], references: [id], onDelete: SetNull)
+  
+  type            String     // CROP_RECOMMENDATION, YIELD_PREDICTION, WEATHER_IMPACT, DISEASE_RISK, INSPECTION_BASED
+  predictedValue  Float
+  confidence      Float      // 0-1
+  factors         String?    // JSON factors
+  recommendation  String?   
+  actions         String?   
+  
+  createdAt       DateTime   @default(now())
+  
+  @@index([fieldId])
+  @@index([type])
+  @@index([inspectionId])
+}
+
+// ============================================================
+// DISEASE DETECTION
+// ============================================================
+
+model DiseaseDetection {
+  id                  String     @id @default(cuid())
+  
+  fieldId             String
+  field               Field      @relation(fields: [fieldId], references: [id], onDelete: Cascade)
+  
+  cropId              String
+  crop                Crop       @relation(fields: [cropId], references: [id], onDelete: Cascade)
+  
+  diseaseName         String?   
+  disease             String?   
+  severity            String?     // MILD, MODERATE, SEVERE, CRITICAL
+  affectedArea        Float?     // percentage
+  
+  symptoms            String?   
+  treatment           String?   
+  recommendation      String?   
+  preventiveMeasures  String?   
+  
+  imageUrl            String?
+  confidence          Float?     // 0-1
+  detectedBy          String?   
+  
+  detectedAt          DateTime   @default(now())
+  createdAt           DateTime   @default(now())
+  updatedAt           DateTime   @updatedAt
+  deletedAt           DateTime?
+  
+  @@index([fieldId])
+  @@index([cropId])
+  @@index([severity])
+  @@index([deletedAt])
+}
+
+// ============================================================
+// MARKET DATA
+// ============================================================
 
 model MarketPrice {
-  id            String   @id @default(uuid())
-  cropName      String   @map("crop_name")
-  variety       String?
-  pricePerQuintal Float @map("price_per_quintal")
-  mandiName     String   @map("mandi_name")
-  district      String?
-  state         String?
-  priceDate     DateTime @map("price_date")
-  changePercent Float? @map("change_percent")
-  trend         String?  // up, down, stable
-  createdAt     DateTime @default(now()) @map("created_at")
-
-  @@index([cropName, priceDate], map: "idx_market_prices_crop_date")
-  @@map("market_prices")
+  id            String     @id @default(cuid())
+  cropName      String    
+  price         Float
+  unit          String     @default("per_kg")
+  location      String?   
+  trend         String?    // UP, DOWN, STABLE
+  
+  recordedAt    DateTime   @default(now())
+  createdAt     DateTime   @default(now())
+  
+  @@index([cropName])
+  @@index([recordedAt])
 }
 
-model ChatMessage {
-  id            String   @id @default(uuid())
-  farmerId      String   @map("farmer_id")
-  sessionId     String?  @map("session_id")
-  messageText   String   @map("message_text")
-  isFromUser    Boolean  @map("is_from_user")
-  messageType   String   @default("text") @map("message_type") // text, image, audio
-  aiConfidence  Float? @map("ai_confidence")
-  responseTimeMs Int?    @map("response_time_ms")
-  createdAt     DateTime @default(now()) @map("created_at")
+// ============================================================
+// ORDERS & TRANSACTIONS
+// ============================================================
 
-  // Relations
-  farmer        Farmer   @relation(fields: [farmerId], references: [id], onDelete: Cascade)
-
-  @@index([farmerId], map: "idx_chat_messages_farmer_id")
-  @@index([sessionId], map: "idx_chat_messages_session")
-  @@map("chat_messages")
+model Order {
+  id              String     @id @default(cuid())
+  userId          String
+  user            User       @relation(fields: [userId], references: [id])
+  
+  product         String    
+  quantity        Float
+  unit            String     @default("kg")
+  
+  price           Float
+  totalAmount     Float
+  
+  status          String     @default("PENDING")  // PENDING, CONFIRMED, SHIPPED, DELIVERED, CANCELLED
+  paymentStatus   String     @default("UNPAID")   // UNPAID, PAID, REFUNDED
+  
+  buyerName       String?   
+  buyerPhone      String?   
+  
+  deliveryDate    DateTime?
+  notes           String?   
+  
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+  
+  @@index([userId])
+  @@index([status])
 }
 
-model SoilAnalysis {
-  id            String   @id @default(uuid())
-  farmId        String   @map("farm_id")
-  farmerId      String   @map("farmer_id")
-  nitrogenPpm   Float?  @map("nitrogen_ppm")
-  phosphorusPpm Float?  @map("phosphorus_ppm")
-  potassiumPpm  Float?  @map("potassium_ppm")
-  phLevel       Float?  @map("ph_level")
-  organicMatter Float?  @map("organic_matter")
-  healthScore   Float?  @map("health_score") // 0-100
-  recommendations String?
-  analyzedAt    DateTime @default(now()) @map("analyzed_at")
+// ============================================================
+// NOTIFICATIONS
+// ============================================================
 
-  // Relations
-  farm          Farm     @relation(fields: [farmId], references: [id], onDelete: Cascade)
-  farmer        Farmer   @relation(fields: [farmerId], references: [id], onDelete: Cascade)
-
-  @@map("soil_analyses")
+model Notification {
+  id              String     @id @default(cuid())
+  userId          String
+  user            User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  type            String     // WEATHER_ALERT, DISEASE_ALERT, RECOMMENDATION, ORDER_UPDATE, PRICE_ALERT, SYSTEM
+  title           String    
+  message         String    
+  
+  dataPayload     String?   
+  deepLink        String?   
+  imageUrl        String?
+  
+  read            Boolean    @default(false)
+  readAt          DateTime?
+  
+  createdAt       DateTime   @default(now())
+  
+  @@index([userId])
+  @@index([read])
 }
 
-model PestDetection {
-  id                      String   @id @default(uuid())
-  farmerId                String   @map("farmer_id")
-  cropId                  String?  @map("crop_id")
-  imageUrl                String?  @map("image_url")
-  pestName                String?  @map("pest_name")
-  confidenceScore         Float? @map("confidence_score")
-  severity                String?  // low, medium, high
-  treatmentRecommendations String?   @map("treatment_recommendations")
-  detectedAt              DateTime @default(now()) @map("detected_at")
+// ============================================================
+// MANUAL CROP INSPECTION
+// ============================================================
 
-  // Relations
-  farmer                  Farmer   @relation(fields: [farmerId], references: [id], onDelete: Cascade)
-  crop                    Crop?    @relation(fields: [cropId], references: [id], onDelete: SetNull)
+model CropInspection {
+  id                  String     @id @default(cuid())
+  
+  fieldId             String
+  field               Field      @relation(fields: [fieldId], references: [id], onDelete: Cascade)
+  
+  cropId              String
+  crop                Crop       @relation(fields: [cropId], references: [id], onDelete: Cascade)
+  
+  // Inspection Details
+  healthStatus        String?    // HEALTHY, STRESSED, DISEASED, CRITICAL
+  pests               String?    // Comma-separated list of observed pests
+  diseases            String?    // Comma-separated list of observed diseases
+  leafCondition       String?    // HEALTHY, YELLOWING, WILTING, DAMAGED, OTHER
+  soilCondition       String?    // GOOD, AVERAGE, POOR, WATERLOGGED, DRY
+  cropHeight          Float?     // cm
+  leafColor           String?    // GREEN, PALE_GREEN, YELLOW, RED, BROWN
+  
+  // Water Management
+  moistureLevel       String?    // WET, ADEQUATE, DRY, VERY_DRY
+  wateringNeeded      Boolean?   @default(false)
+  
+  // Problem Description
+  issues              String?    // Free-form text about observed issues
+  recommendation      String?    // Manual inspection notes/recommendations
+  actionRequired      Boolean?   @default(false)
+  riskLevel           String?    // LOW, MEDIUM, HIGH, CRITICAL
+  
+  // Media
+  imageUrl            String?
+  
+  // Inspector Info
+  inspectedBy         String?
+  notes               String?
+  
+  inspectedAt         DateTime   @default(now())
+  createdAt           DateTime   @default(now())
+  updatedAt           DateTime   @updatedAt
+  deletedAt           DateTime?
+  
+  // Relations for predictions generated from this inspection
+  predictions         Prediction[]  @relation("InspectionPredictions")
+  
+  @@index([fieldId])
+  @@index([cropId])
+  @@index([healthStatus])
+  @@index([riskLevel])
+  @@index([inspectedAt])
+  @@index([deletedAt])
+}
 
-  @@map("pest_detections")
+// Updated Prediction Model to link with CropInspection
+// Note: Add this relation to existing Prediction model
+
+// ============================================================
+// ANALYTICS
+// ============================================================
+
+model Analytics {
+  id            String     @id @default(cuid())
+  userId        String
+  
+  event         String    
+  category      String?   
+  value         Float?
+  metadata      String?   
+  
+  createdAt     DateTime   @default(now())
+  
+  @@index([userId])
+  @@index([event])
 }

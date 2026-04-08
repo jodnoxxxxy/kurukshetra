@@ -15,6 +15,12 @@ module.exports = {
   JWT_REFRESH_SECRET: process.env.JWT_REFRESH_SECRET,
   JWT_REFRESH_EXPIRE_IN: process.env.JWT_REFRESH_EXPIRE_IN || '30d',
   
+  // Firebase
+  FIREBASE_PROJECT_ID: process.env.FIREBASE_PROJECT_ID,
+  FIREBASE_CLIENT_EMAIL: process.env.FIREBASE_CLIENT_EMAIL,
+  FIREBASE_PRIVATE_KEY: process.env.FIREBASE_PRIVATE_KEY,
+  FCM_ENABLED: !!process.env.FIREBASE_PROJECT_ID,
+  
   // Redis
   REDIS_URL: process.env.REDIS_URL || 'redis://localhost:6379',
   

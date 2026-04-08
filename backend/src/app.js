@@ -8,18 +8,27 @@ const http = require('http');
 const { Server } = require('socket.io');
 
 const config = require('./config');
-const { connectDB } = require('./config/database');
+const { initializeFirebase } = require('./config/firebase');
 const logger = require('./utils/logger');
 
 // Import routes
 const authRoutes = require('./routes/auth');
+const farmRoutes = require('./routes/farms');
 const farmerRoutes = require('./routes/farmers');
 const marketRoutes = require('./routes/market');
 const aiRoutes = require('./routes/ai');
 const chatRoutes = require('./routes/chat');
+const cropRoutes = require('./routes/crops');
+const climateRoutes = require('./routes/climate');
+const monitoringRoutes = require('./routes/monitoring');
+const diseaseRoutes = require('./routes/diseases');
+const orderRoutes = require('./routes/orders');
+const notificationRoutes = require('./routes/notifications');
+const inspectionRoutes = require('./routes/inspections');
 
 // Import socket handlers
 const { initializeSocket } = require('./sockets');
+const { errorHandlingMiddleware } = require('./middleware/errorHandler');
 
 // Create Express app
 const app = express();
@@ -94,29 +103,31 @@ app.get('/health', (req, res) => {
 
 // API Routes
 app.use(`/api/${config.API_VERSION}/auth`, authRoutes);
+app.use(`/api/${config.API_VERSION}/farms`, farmRoutes);
 app.use(`/api/${config.API_VERSION}/farmers`, farmerRoutes);
 app.use(`/api/${config.API_VERSION}/market`, marketRoutes);
 app.use(`/api/${config.API_VERSION}/ai`, aiRoutes);
 app.use(`/api/${config.API_VERSION}/chat`, chatRoutes);
+app.use(`/api/${config.API_VERSION}/crops`, cropRoutes);
+app.use(`/api/${config.API_VERSION}/climate`, climateRoutes);
+app.use(`/api/${config.API_VERSION}/monitoring`, monitoringRoutes);
+app.use(`/api/${config.API_VERSION}/diseases`, diseaseRoutes);
+app.use(`/api/${config.API_VERSION}/orders`, orderRoutes);
+app.use(`/api/${config.API_VERSION}/notifications`, notificationRoutes);
+app.use(`/api/${config.API_VERSION}/inspections`, inspectionRoutes);
 
 // 404 handler
 app.use((req, res) => {
   res.status(404).json({
-    status: 'error',
+    success: false,
+    statusCode: 404,
     message: 'Route not found',
+    path: req.path,
   });
 });
 
-// Global error handler
-app.use((err, req, res, next) => {
-  logger.error('Global error:', err);
-  
-  res.status(err.status || 500).json({
-    status: 'error',
-    message: config.NODE_ENV === 'development' ? err.message : 'Internal server error',
-    ...(config.NODE_ENV === 'development' && { stack: err.stack }),
-  });
-});
+// Global error handler middleware
+app.use(errorHandlingMiddleware);
 
 // Initialize Socket.IO
 initializeSocket(server);
@@ -124,8 +135,8 @@ initializeSocket(server);
 // Start server
 async function startServer() {
   try {
-    // Connect to database
-    await connectDB();
+    // Initialize Firebase
+    initializeFirebase();
     
     // Start listening
     server.listen(config.PORT, () => {
@@ -137,10 +148,16 @@ async function startServer() {
       logger.info(`API Endpoints:`);
       logger.info(`  Health: http://localhost:${config.PORT}/health`);
       logger.info(`  Auth:   http://localhost:${config.PORT}/api/${config.API_VERSION}/auth`);
+      logger.info(`  Farms:  http://localhost:${config.PORT}/api/${config.API_VERSION}/farms`);
       logger.info(`  Farmers: http://localhost:${config.PORT}/api/${config.API_VERSION}/farmers`);
       logger.info(`  Market: http://localhost:${config.PORT}/api/${config.API_VERSION}/market`);
       logger.info(`  AI:     http://localhost:${config.PORT}/api/${config.API_VERSION}/ai`);
       logger.info(`  Chat:   http://localhost:${config.PORT}/api/${config.API_VERSION}/chat`);
+      logger.info(`  Crops:  http://localhost:${config.PORT}/api/${config.API_VERSION}/crops`);
+      logger.info(`  Monitoring: http://localhost:${config.PORT}/api/${config.API_VERSION}/monitoring`);
+      logger.info(`  Diseases: http://localhost:${config.PORT}/api/${config.API_VERSION}/diseases`);
+      logger.info(`  Orders: http://localhost:${config.PORT}/api/${config.API_VERSION}/orders`);
+      logger.info(`  Notifications: http://localhost:${config.PORT}/api/${config.API_VERSION}/notifications`);
       logger.info(``);
       logger.info(`WebSocket: ws://localhost:${config.PORT}`);
     });
@@ -155,7 +172,6 @@ process.on('SIGTERM', async () => {
   logger.info('SIGTERM signal received: closing HTTP server');
   server.close(async () => {
     logger.info('HTTP server closed');
-    await require('./config/database').disconnectDB();
     process.exit(0);
   });
 });

@@ -46,7 +46,7 @@ class ClimateService {
 
       // Set timeout for GPS location lock
       final position = await Geolocator.getCurrentPosition(
-        timeoutDuration: const Duration(seconds: 30),
+        timeLimit: const Duration(seconds: 30),
       );
       
       return position;

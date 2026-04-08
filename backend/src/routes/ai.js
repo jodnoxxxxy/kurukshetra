@@ -197,28 +197,27 @@ function identifyDeficiencies(n, p, k, ph) {
 // COMPREHENSIVE CROP DATABASE with season, temperature, water requirements 
 const CROP_DATABASE = [
   // Kharif (Monsoon) Crops
-  { name: 'Rice', season: 'Kharif', tempMin: 15, tempMax: 35, waterNeeds: 'High', soilType: ['Loamy', 'Alluvial', 'Clay'], suitability: { Kharif: 95, Rabi: 10, Summer: 5 }, reason: 'Ideal for high water availability and monsoon season' },
-  { name: 'Maize', season: 'Kharif', tempMin: 20, tempMax: 30, waterNeeds: 'Medium', soilType: ['Loamy', 'Sandy Loam', 'Black'], suitability: { Kharif: 90, Rabi: 40, Summer: 30 }, reason: 'Versatile, grows well in various soils' },
-  { name: 'Cotton', season: 'Kharif', tempMin: 25, tempMax: 40, waterNeeds: 'Low', soilType: ['Black', 'Loamy'], suitability: { Kharif: 85, Rabi: 20, Summer: 60 }, reason: 'Thrives in high temperature and black soil' },
-  { name: 'Soybean', season: 'Kharif', tempMin: 20, tempMax: 35, waterNeeds: 'Medium', soilType: ['Black', 'Loamy', 'Sandy Loam'], suitability: { Kharif: 90, Rabi: 30, Summer: 10 }, reason: 'Good protein crop, suitable for black soil' },
-  { name: 'Sugarcane', season: 'Kharif', tempMin: 20, tempMax: 30, waterNeeds: 'High', soilType: ['Loamy', 'Alluvial', 'Sandy Loam'], suitability: { Kharif: 80, Rabi: 10, Summer: 50 }, reason: 'Needs regular water and warm climate' },
+  { name: 'Rice', season: 'Kharif', tempMin: 15, tempMax: 35, waterNeeds: 'High', soilType: ['Loamy', 'Alluvial', 'Clay'], suitability: { Kharif: 95, Rabi: 10, Summer: 5 }, reason: 'Ideal for high water availability and monsoon season', imageUrl: 'https://images.unsplash.com/photo-1536633100227-2300bcfd01e6?q=80&w=400&auto=format&fit=crop' },
+  { name: 'Maize', season: 'Kharif', tempMin: 20, tempMax: 30, waterNeeds: 'Medium', soilType: ['Loamy', 'Sandy Loam', 'Black'], suitability: { Kharif: 90, Rabi: 40, Summer: 30 }, reason: 'Versatile, grows well in various soils', imageUrl: 'https://images.unsplash.com/photo-1551730459-92db2a308d6a?q=80&w=400&auto=format&fit=crop' },
+  { name: 'Cotton', season: 'Kharif', tempMin: 25, tempMax: 40, waterNeeds: 'Low', soilType: ['Black', 'Loamy'], suitability: { Kharif: 85, Rabi: 20, Summer: 60 }, reason: 'Thrives in high temperature and black soil', imageUrl: 'https://images.unsplash.com/photo-1594904351111-a072f80b1a71?q=80&w=400&auto=format&fit=crop' },
+  { name: 'Soybean', season: 'Kharif', tempMin: 20, tempMax: 35, waterNeeds: 'Medium', soilType: ['Black', 'Loamy', 'Sandy Loam'], suitability: { Kharif: 90, Rabi: 30, Summer: 10 }, reason: 'Good protein crop, suitable for black soil', imageUrl: 'https://images.unsplash.com/photo-1560493676-04071c5f467b?q=80&w=400&auto=format&fit=crop' },
+  { name: 'Sugarcane', season: 'Kharif', tempMin: 20, tempMax: 30, waterNeeds: 'High', soilType: ['Loamy', 'Alluvial', 'Sandy Loam'], suitability: { Kharif: 80, Rabi: 10, Summer: 50 }, reason: 'Needs regular water and warm climate', imageUrl: 'https://images.unsplash.com/photo-1594910410650-8488e5b4970a?q=80&w=400&auto=format&fit=crop' },
   
   // Rabi (Winter) Crops
-  { name: 'Wheat', season: 'Rabi', tempMin: 10, tempMax: 25, waterNeeds: 'Low', soilType: ['Loamy', 'Clay Loam', 'Sandy Loam'], suitability: { Kharif: 20, Rabi: 95, Summer: 10 }, reason: 'Perfect for winter season and moderate temperature' },
-  { name: 'Chickpea', season: 'Rabi', tempMin: 10, tempMax: 25, waterNeeds: 'Low', soilType: ['Black', 'Loamy', 'Clay'], suitability: { Kharif: 10, Rabi: 90, Summer: 5 }, reason: 'Nitrogen-fixing, good for soil health' },
-  { name: 'Mustard', season: 'Rabi', tempMin: 10, tempMax: 25, waterNeeds: 'Low', soilType: ['Loamy', 'Clay Loam', 'Sandy'], suitability: { Kharif: 15, Rabi: 85, Summer: 10 }, reason: 'Oil crop, suitable for winter' },
-  { name: 'Barley', season: 'Rabi', tempMin: 5, tempMax: 25, waterNeeds: 'Low', soilType: ['Loamy', 'Sandy Loam', 'Clay'], suitability: { Kharif: 10, Rabi: 90, Summer: 5 }, reason: 'Tolerates cold better than wheat' },
-  { name: 'Lentil', season: 'Rabi', tempMin: 10, tempMax: 25, waterNeeds: 'Low', soilType: ['Well-drained', 'Loamy', 'Sandy'], suitability: { Kharif: 10, Rabi: 85, Summer: 5 }, reason: 'Protein-rich legume for winter' },
+  { name: 'Wheat', season: 'Rabi', tempMin: 10, tempMax: 25, waterNeeds: 'Low', soilType: ['Loamy', 'Clay Loam', 'Sandy Loam'], suitability: { Kharif: 20, Rabi: 95, Summer: 10 }, reason: 'Perfect for winter season and moderate temperature', imageUrl: 'https://images.unsplash.com/photo-1501438901235-5b4d7938384b?q=80&w=400&auto=format&fit=crop' },
+  { name: 'Chickpea', season: 'Rabi', tempMin: 10, tempMax: 25, waterNeeds: 'Low', soilType: ['Black', 'Loamy', 'Clay'], suitability: { Kharif: 10, Rabi: 90, Summer: 5 }, reason: 'Nitrogen-fixing, good for soil health', imageUrl: 'https://images.unsplash.com/photo-1582213782179-e0d53f98f2ca?q=80&w=400&auto=format&fit=crop' },
+  { name: 'Mustard', season: 'Rabi', tempMin: 10, tempMax: 25, waterNeeds: 'Low', soilType: ['Loamy', 'Clay Loam', 'Sandy'], suitability: { Kharif: 15, Rabi: 85, Summer: 10 }, reason: 'Oil crop, suitable for winter', imageUrl: 'https://images.unsplash.com/photo-1549412151-512140660686?q=80&w=400&auto=format&fit=crop' },
+  { name: 'Barley', season: 'Rabi', tempMin: 5, tempMax: 25, waterNeeds: 'Low', soilType: ['Loamy', 'Sandy Loam', 'Clay'], suitability: { Kharif: 10, Rabi: 90, Summer: 5 }, reason: 'Tolerates cold better than wheat', imageUrl: 'https://images.unsplash.com/photo-1534960333203-aa8632612f00?q=80&w=400&auto=format&fit=crop' },
+  { name: 'Lentil', season: 'Rabi', tempMin: 10, tempMax: 25, waterNeeds: 'Low', soilType: ['Well-drained', 'Loamy', 'Sandy'], suitability: { Kharif: 10, Rabi: 85, Summer: 5 }, reason: 'Protein-rich legume for winter', imageUrl: 'https://images.unsplash.com/photo-1518926210200-c0450ee64d8a?q=80&w=400&auto=format&fit=crop' },
   
   // Summer Crops
-  { name: 'Groundnut', season: 'Summer', tempMin: 25, tempMax: 35, waterNeeds: 'Low', soilType: ['Sandy Loam', 'Loamy'], suitability: { Kharif: 30, Rabi: 10, Summer: 90 }, reason: 'Heat and drought tolerant oil crop' },
-  { name: 'Sesame', season: 'Summer', tempMin: 25, tempMax: 35, waterNeeds: 'Low', soilType: ['Well-drained', 'Sandy Loam'], suitability: { Kharif: 30, Rabi: 10, Summer: 85 }, reason: 'Thrives in heat and dry conditions' },
-  { name: 'Vegetables (Summer)', season: 'Summer', tempMin: 20, tempMax: 35, waterNeeds: 'Medium', soilType: ['Loamy', 'Sandy Loam'], suitability: { Kharif: 40, Rabi: 20, Summer: 80 }, reason: 'Tomato, Cucumber, Brinjal - market demand' },
+  { name: 'Groundnut', season: 'Summer', tempMin: 25, tempMax: 35, waterNeeds: 'Low', soilType: ['Sandy Loam', 'Loamy'], suitability: { Kharif: 30, Rabi: 10, Summer: 90 }, reason: 'Heat and drought tolerant oil crop', imageUrl: 'https://images.unsplash.com/photo-1558222218-b7b54eede3f3?q=80&w=400&auto=format&fit=crop' },
+  { name: 'Sesame', season: 'Summer', tempMin: 25, tempMax: 35, waterNeeds: 'Low', soilType: ['Well-drained', 'Sandy Loam'], suitability: { Kharif: 30, Rabi: 10, Summer: 85 }, reason: 'Thrives in heat and dry conditions', imageUrl: 'https://images.unsplash.com/photo-1574316071802-0d684efa7bf5?q=80&w=400&auto=format&fit=crop' },
+  { name: 'Vegetables (Summer)', season: 'Summer', tempMin: 20, tempMax: 35, waterNeeds: 'Medium', soilType: ['Loamy', 'Sandy Loam'], suitability: { Kharif: 40, Rabi: 20, Summer: 80 }, reason: 'Tomato, Cucumber, Brinjal - market demand', imageUrl: 'https://images.unsplash.com/photo-1610348725531-843dff563e2c?q=80&w=400&auto=format&fit=crop' },
   
   // Year-round
-  { name: 'Sugarcane', season: 'All', tempMin: 20, tempMax: 30, waterNeeds: 'High', soilType: ['Loamy', 'Alluvial'], suitability: { Kharif: 80, Rabi: 30, Summer: 50 }, reason: 'Can be planted anytime, long duration' },
-  { name: 'Fruits (Mango)', season: 'All', tempMin: 15, tempMax: 40, waterNeeds: 'Medium', soilType: ['Well-drained', 'Loamy'], suitability: { Kharif: 70, Rabi: 60, Summer: 75 }, reason: 'Perennial, good for market value' },
-  { name: 'Coconut', season: 'All', tempMin: 24, tempMax: 30, waterNeeds: 'High', soilType: ['Sandy', 'Sandy Loam', 'Alluvial'], suitability: { Kharif: 70, Rabi: 70, Summer: 70 }, reason: 'Perennial, high value crop' },
+  { name: 'Fruits (Mango)', season: 'All', tempMin: 15, tempMax: 40, waterNeeds: 'Medium', soilType: ['Well-drained', 'Loamy'], suitability: { Kharif: 70, Rabi: 60, Summer: 75 }, reason: 'Perennial, good for market value', imageUrl: 'https://images.unsplash.com/photo-1553334820-13d6144043b4?q=80&w=400&auto=format&fit=crop' },
+  { name: 'Coconut', season: 'All', tempMin: 24, tempMax: 30, waterNeeds: 'High', soilType: ['Sandy', 'Sandy Loam', 'Alluvial'], suitability: { Kharif: 70, Rabi: 70, Summer: 70 }, reason: 'Perennial, high value crop', imageUrl: 'https://images.unsplash.com/photo-1589182373726-e4f658ab50f0?q=80&w=400&auto=format&fit=crop' },
 ];
 
 // POST /api/v1/ai/crop-recommendation
@@ -352,6 +351,7 @@ function generateSmartCropRecommendations(soilType, waterAvailability, temperatu
       suitability: `${crop.suitabilityScore}%`,
       reason: crop.reason,
       description: `Suitable for ${season} season with ${temperature}°C temperature`,
+      imageUrl: crop.imageUrl,
       tempRange: `${crop.tempMin}-${crop.tempMax}°C`,
       waterRequirement: crop.waterNeeds,
       soilSuitability: crop.soilType.join(', '),

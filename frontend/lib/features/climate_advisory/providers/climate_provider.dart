@@ -21,19 +21,20 @@ final climateAdvisoryProvider = FutureProvider.autoDispose<ClimateAdvisoryRespon
 });
 
 // Provider for retry attempts
-final climateAdvisoryRetryProvider = StateNotifierProvider.autoDispose<
+final climateAdvisoryRetryProvider = NotifierProvider.autoDispose<
     RetryNotifier,
-    AsyncValue<ClimateAdvisoryResponse>>((ref) {
-  return RetryNotifier(ref);
+    AsyncValue<ClimateAdvisoryResponse>>(() {
+  return RetryNotifier();
 });
 
-class RetryNotifier extends StateNotifier<AsyncValue<ClimateAdvisoryResponse>> {
-  final Ref _ref;
+class RetryNotifier extends Notifier<AsyncValue<ClimateAdvisoryResponse>> {
   int _retryCount = 0;
   final int maxRetries = 3;
 
-  RetryNotifier(this._ref) : super(const AsyncValue.loading()) {
+  @override
+  AsyncValue<ClimateAdvisoryResponse> build() {
     _fetchWithRetry();
+    return const AsyncValue.loading();
   }
 
   Future<void> _fetchWithRetry() async {
@@ -42,7 +43,7 @@ class RetryNotifier extends StateNotifier<AsyncValue<ClimateAdvisoryResponse>> {
     while (_retryCount < maxRetries) {
       try {
         state = const AsyncValue.loading();
-        final service = _ref.watch(climateServiceProvider);
+        final service = ref.watch(climateServiceProvider);
         final result = await service.fetchClimateAdvisory();
         state = AsyncValue.data(result);
         return;

@@ -1,114 +1,82 @@
-# 🚜 Kurukshetra Organic Farming App
+# Kurukshetra — Smart Farming Platform
 
-## 🧰 Technologies Used in My Project
+An end-to-end smart-farming platform for Indian farmers: AI crop recommendation, crop advisory timelines, soil/pest/fertilizer tools, market prices, government schemes, expenses/yield/analytics, plus a farmer↔consumer marketplace, chat, and learning modules.
 
-### 1. 📱 Front-End Development
+## Architecture
+```
+Flutter (frontend/)
+      ↓  REST (baseUrl: http://localhost:5000/api/v1)
+Node.js + Express (backend/)
+      ↓  Firebase Admin SDK
+Firebase (Auth, Firestore, Storage, FCM)
+      ↓  HTTP calls to env-configured Python services
+Python ML models (ai_ml/)
+```
+Core flow: User → Profile → Farm → Crop (manual or AI recommendation) → Crop Advisory (stages/timeline/tasks) → Location+Weather+Soil → Advisory Engine (insights/alerts/risks) → Expense/Yield/Price → Revenue/Profit → Analytics.
 
-* **Technology:** Flutter
-* **Role in Project:**
+## Repository structure
+- `frontend/` — Flutter app (canonical UI project)
+- `backend/` — Node.js/Express API + Prisma + Socket.IO
+- `ai_ml/` — Python ML models/scripts
+- `database/` — Prisma schema, migrations, seeds, Firestore seed
+- `docs/` — API documentation
 
-  * Builds cross-platform mobile application (Android & iOS)
-  * Creates interactive UI (forms, dashboards, crop advisory screens)
-  * Handles navigation and user experience
+## Prerequisites
+- Flutter SDK 3.9+, Dart 3.9+
+- Node.js 20+, npm
+- Firebase project (Auth, Firestore, Storage, Cloud Messaging)
+- Python 3.10+ (for `ai_ml/`)
 
----
+## Setup
+### Backend
+```bash
+cd backend
+cp .env.example .env    # fill in real values
+npm install
+npm run db:generate
+npm run dev
+```
+Server starts on `http://localhost:5000`. Health: `GET /health`.
 
-### 2. 🌐 Back-End & API
+### Frontend
+```bash
+cd frontend
+flutter pub get
+flutter run                # Android emulator: use API_URL=http://10.0.2.2:5000/api/v1
+```
 
-* **Technology:** Node.js *(or Django — choose one you actually use)*
-* **Role in Project:**
+### Firebase
+1. Create a Firebase project; enable Email/Phone auth, Firestore, Storage, FCM.
+2. Download service-account JSON → put as `backend/firebase-credentials.json` (git-ignored).
+3. For Android/iOS/Web, place `google-services.json` / `firebase_options.dart` as usual.
 
-  * Handles API requests from mobile app
-  * Connects frontend with AI/ML models
-  * Manages server-side logic and data flow
+## Environment variables (backend)
+See `backend/.env.example` — includes `NODE_ENV, PORT, API_VERSION, DATABASE_URL, JWT_SECRET, JWT_REFRESH_SECRET, FIREBASE_PROJECT_ID/PRIVATE_KEY/CLIENT_EMAIL, CLOUDINARY_*, FRONTEND_URL, RATE_LIMIT_*, SOIL_ANALYSIS_URL, PEST_DETECTION_URL, CROP_RECOMMENDATION_URL, YIELD_PREDICTION_URL, MAX_FILE_SIZE, UPLOAD_PATH`.
 
----
+## Authentication flow
+Phone/OTP via Firebase Auth (or backend OTP service) → session token → Home. Mock tokens are rejected in production (`NODE_ENV=production`).
 
-### 3. 🤖 AI / Machine Learning
+## Crop system
+One Crop Advisory owner: timeline/stages/tasks. AI (or manual selection) only supplies the crop name/id → the same advisory system loads that crop's own stages/tasks. Never hardcode Rice/Pune.
 
-* **Technology:** Python, TensorFlow, Scikit-learn
-* **Role in Project:**
+## API overview
+Base `http://localhost:5000/api/v1`. Key groups: `auth`, `farmers`, `farms`, `market`, `ai`, `chat`, `crops`, `climate`, `monitoring`, `diseases`, `orders`, `notifications`, `inspections`. Full reference: `backend/API_DOCUMENTATION.md`.
 
-  * Crop recommendation system
-  * Disease detection (image-based)
-  * Yield prediction
-  * Weather-based smart suggestions
+## Testing
+```bash
+cd backend && npm test                 # Jest (1 auth test currently)
+cd frontend && flutter test            # Widget/unit tests
+cd frontend && flutter analyze         # 0 errors expected
+```
 
----
+## Build & deploy
+```bash
+cd frontend && flutter build apk --release
+cd backend && docker build -t kurukshetra-backend .
+```
 
-### 4. 🗄️ Database
-
-* **Technology:** Firebase (Realtime DB / Firestore)
-* **Role in Project:**
-
-  * Stores user data (farmer details, farm info)
-  * Real-time sync of data
-  * Authentication system
-  * Stores crop advisory results
-
----
-
-### 5. 🔔 Notifications
-
-* **Technology:** Firebase Cloud Messaging (FCM)
-* **Role in Project:**
-
-  * Sends real-time alerts
-  * Weather updates
-  * AI recommendations
-  * Reminder notifications
-
----
-
-### 6. 📊 Data Processing
-
-* **Technology:** Pandas, NumPy
-* **Role in Project:**
-
-  * Processes agricultural data
-  * Prepares datasets for ML models
-  * Performs analysis for predictions
-
----
-
-### 7. ☁️ Deployment / Hosting
-
-* **Technology:** Firebase Hosting *(or AWS if used)*
-* **Role in Project:**
-
-  * Hosts backend services
-  * Ensures app scalability and uptime
-  * Manages cloud data operations
-
----
-
-### 8. 🔧 Version Control
-
-* **Technology:** Git, GitHub
-* **Role in Project:**
-
-  * Tracks code changes
-  * Maintains project versions
-  * Enables collaboration
-
----
-
-### 9. 🎨 UI/UX Design
-
-* **Technology:** Figma
-* **Role in Project:**
-
-  * Designs app layout and wireframes
-  * Improves user experience
-  * Creates responsive UI structure
-
----
-
-### 10. 🧪 Testing
-
-* **Technology:** Postman, Flutter Test
-* **Role in Project:**
-
-  * Tests APIs and backend functionality
-  * Verifies frontend features
-  * Ensures bug-free performance
+## Troubleshooting
+- `flutter analyze` errors → run `flutter pub get`, then `dart fix --apply`.
+- 401 on API → ensure `JWT_SECRET` matches the token issuer.
+- CORS error → add your origin to `FRONTEND_URL` in `.env`.
+- ML endpoints failing → set `SOIL_ANALYSIS_URL`/`PEST_DETECTION_URL`/`CROP_RECOMMENDATION_URL`/`YIELD_PREDICTION_URL` to running services.

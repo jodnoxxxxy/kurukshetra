@@ -4,7 +4,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/crop_advisory_provider.dart';
 import '../widgets/recommendation_card.dart';
-import 'crop_timeline_screen.dart';
 
 class CropRecommendationScreen extends ConsumerWidget {
   const CropRecommendationScreen({super.key});

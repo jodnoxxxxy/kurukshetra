@@ -1,9 +1,9 @@
-const { getAuth, getFirestore } = require('../config/firebase');
+const { getFirestore } = require('../config/firebase');
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
 
 class UserService {
   constructor() {
-    this.auth = getAuth();
     this.db = getFirestore();
     this.usersCollection = this.db.collection('users');
     this.preferencesCollection = this.db.collection('preferences');
@@ -11,35 +11,37 @@ class UserService {
 
   // Register a new user
   async register(userData) {
-    const { email, password, phone, firstName, lastName, role = 'FARMER' } = userData;
+    const { name, password, phone, location, role = 'FARMER' } = userData;
 
     try {
-      // Create Firebase Auth user
-      const userRecord = await this.auth.createUser({
-        email,
-        password,
-        displayName: `${firstName} ${lastName}`,
-        phoneNumber: phone,
-      });
+      // 1. Check if user already exists
+      const existingUser = await this.usersCollection.doc(phone).get();
+      if (existingUser.exists) {
+        throw new Error('User with this phone number already exists.');
+      }
 
-      // Store additional user data in Firestore
+      // 2. Hash password securely
+      const saltRounds = 10;
+      const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+      // 3. Store additional user data in Firestore
       const user = {
-        id: userRecord.uid,
-        email,
+        name,
         phone,
-        firstName,
-        lastName,
+        password: hashedPassword,
+        location: location || {},
         role,
-        verified: false,
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        verified: true, // They verified via OTP before calling this endpoint
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       };
 
-      await this.usersCollection.doc(userRecord.uid).set(user);
+      // 4. Save to Firestore using phone as docId logic
+      await this.usersCollection.doc(phone).set(user);
 
-      // Create default preferences
-      await this.preferencesCollection.doc(userRecord.uid).set({
-        userId: userRecord.uid,
+      // 5. Create default preferences
+      await this.preferencesCollection.doc(phone).set({
+        userId: phone,
         weatherAlerts: true,
         diseaseAlerts: true,
         priceAlerts: true,
@@ -50,42 +52,46 @@ class UserService {
       });
 
       const { password: _, ...userWithoutPassword } = user;
+      userWithoutPassword.id = phone;
       return userWithoutPassword;
     } catch (error) {
-      console.error('Firebase registration error:', error.message);
+      console.error('Registration error:', error.message);
       throw error;
     }
   }
 
-  // Login user (Note: Usually handled on client with Firebase, but here we can verify a token)
-  async login(email, password) {
-    // In Firebase Admin SDK, we don't 'login' with password. 
-    // Usually, the frontend logins directly and sends the ID token.
-    // If the backend MUST handle login, it's cumbersome with Admin SDK.
-    // However, we can simulate or use the user's data from Firestore.
-    
-    // For the sake of this API, we'll assume the frontend will send a request 
-    // that eventually verifies with ID token, but if we need a classic /login:
-    // We'll check the user from Firestore (this is NOT secure, it should be done client-side).
-    
-    const snapshot = await this.usersCollection.where('email', '==', email).get();
-    if (snapshot.empty) {
-      throw new Error('Invalid email or password');
+  // Login user via phone + password
+  async login(phone, password) {
+    try {
+      // 1. Check if user exists
+      const snapshot = await this.usersCollection.doc(phone).get();
+      
+      if (!snapshot.exists) {
+        throw new Error('User not found');
+      }
+
+      const user = snapshot.data();
+      user.id = phone; // Attach ID context helper
+
+      // 2. Safely compare password
+      const passwordMatches = await bcrypt.compare(password, user.password);
+      
+      if (!passwordMatches) {
+        throw new Error('Wrong password');
+      }
+
+      // 3. Generate a JWT for this backend session
+      const token = jwt.sign(
+        { id: user.id, phone: user.phone, role: user.role },
+        process.env.JWT_SECRET || 'kurukshetra-secret-key',
+        { expiresIn: '7d' }
+      );
+
+      const { password: _, ...secureUser } = user;
+      return { user: secureUser, token };
+    } catch (error) {
+      throw error;
     }
-
-    const user = snapshot.docs[0].data();
-    
-    // NOTE: In a real Firebase app, the frontend handles the password exchange.
-    // The backend only verifies the resulting ID token.
-    
-    // Generate a JWT for this backend session if needed, or return user
-    const token = jwt.sign(
-      { id: user.id, email: user.email, role: user.role },
-      process.env.JWT_SECRET || 'kurukshetra-secret-key',
-      { expiresIn: '7d' }
-    );
-
-    return { user, token };
   }
 
   // Get user by ID
@@ -150,12 +156,21 @@ class UserService {
   // Change password
   async changePassword(userId, oldPassword, newPassword) {
     try {
-      // In Firebase Admin SDK, we can just update the password
-      // Note: We don't verify the old password here as Admin SDK has master access.
-      // For higher security, you'd usually do this client-side.
-      await this.auth.updateUser(userId, {
-        password: newPassword
+      const doc = await this.usersCollection.doc(userId).get();
+      if (!doc.exists) throw new Error('User not found');
+      
+      const user = doc.data();
+      const valid = await bcrypt.compare(oldPassword, user.password);
+      if (!valid) throw new Error('Old password is incorrect');
+
+      const saltRounds = 10;
+      const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
+
+      await this.usersCollection.doc(userId).update({
+        password: hashedPassword,
+        updatedAt: new Date().toISOString()
       });
+      
       return { message: 'Password changed successfully' };
     } catch (error) {
       throw new Error(error.message);
@@ -164,9 +179,7 @@ class UserService {
 
   // Logout (mostly a placeholder for token invalidation)
   async logout(userId) {
-    // Firebase tokens are stateless, so usually you just clear them on client.
-    // Optionally, you can revoke tokens:
-    await this.auth.revokeRefreshTokens(userId);
+    // In a pure JWT system, the client deletes the token. 
     return { message: 'Logged out successfully' };
   }
 
@@ -176,13 +189,13 @@ class UserService {
       const user = await this.getUserById(userId);
 
       const accessToken = jwt.sign(
-        { id: user.id, email: user.email, role: user.role },
+        { id: userId, phone: user.phone, role: user.role },
         process.env.JWT_SECRET || 'kurukshetra-secret-key',
         { expiresIn: '15m' }
       );
 
       const refreshToken = jwt.sign(
-        { id: user.id, email: user.email, role: user.role, type: 'refresh' },
+        { id: userId, phone: user.phone, role: user.role, type: 'refresh' },
         process.env.REFRESH_TOKEN_SECRET || 'kurukshetra-refresh-secret',
         { expiresIn: '7d' }
       );

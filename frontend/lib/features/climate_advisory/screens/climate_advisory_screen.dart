@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/climate_provider.dart';
 import '../models/climate_model.dart';
-import 'package:kurukshetra/core/constants/app_colors.dart'; // Standard colors if needed
 
 class ClimateAdvisoryScreen extends ConsumerWidget {
   const ClimateAdvisoryScreen({Key? key}) : super(key: key);

@@ -11,11 +11,6 @@ class FirebaseUserService {
     return prefs.getString('auth_token') ?? '';
   }
 
-  Future<String> _getUserId() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString('user_id') ?? 'demo_farmer_123';
-  }
-
   Future<void> saveFarmerRegistration({
     required String userId, required String firstName, required String lastName,
     required String email, required String phone, required String soilType,

@@ -1,0 +1,666 @@
+{
+  "info": {
+    "name": "Kurukshetra API",
+    "description": "Complete API collection for Kurukshetra agricultural platform",
+    "version": "1.0",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Health Check",
+      "item": [
+        {
+          "name": "Check API Status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/health",
+              "host": ["{{base_url}}"],
+              "path": ["health"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Fertilizer Calculator",
+      "item": [
+        {
+          "name": "Calculate Fertilizer Requirement",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"crop\": \"RICE\",\n  \"landArea\": 1.5,\n  \"soilNutrients\": {\n    \"N\": 150,\n    \"P\": 50,\n    \"K\": 100\n  },\n  \"budget\": \"High\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/fertilizer/calculate",
+              "host": ["{{base_url}}"],
+              "path": ["fertilizer", "calculate"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Fertilizer Recommendations",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/fertilizer/recommendations/WHEAT",
+              "host": ["{{base_url}}"],
+              "path": ["fertilizer", "recommendations", "WHEAT"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Nutrient Standards",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/fertilizer/standards/WHEAT",
+              "host": ["{{base_url}}"],
+              "path": ["fertilizer", "standards", "WHEAT"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Optimize by Budget",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"crop\": \"COTTON\",\n  \"landArea\": 2.0,\n  \"budget\": \"Low\",\n  \"soilNutrients\": {\n    \"N\": 120,\n    \"P\": 40,\n    \"K\": 80\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/fertilizer/budget-optimization",
+              "host": ["{{base_url}}"],
+              "path": ["fertilizer", "budget-optimization"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Soil Health Analysis",
+      "item": [
+        {
+          "name": "Analyze Soil",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pH\": 6.8,\n  \"nitrogen\": 180,\n  \"phosphorus\": 45,\n  \"potassium\": 120,\n  \"organicMatter\": 2.5,\n  \"ec\": 0.8,\n  \"crop\": \"SUGARCANE\",\n  \"micronutrients\": {\n    \"Zn\": 1.5,\n    \"Fe\": 15,\n    \"Cu\": 1.0,\n    \"Mn\": 5.0,\n    \"B\": 0.5,\n    \"Mo\": 0.1\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/soil-health/analyze",
+              "host": ["{{base_url}}"],
+              "path": ["soil-health", "analyze"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Soil Standards",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/soil-health/standards/WHEAT",
+              "host": ["{{base_url}}"],
+              "path": ["soil-health", "standards", "WHEAT"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Micronutrient Standards",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/soil-health/micronutrient-standards",
+              "host": ["{{base_url}}"],
+              "path": ["soil-health", "micronutrient-standards"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Generate Improvement Plan",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pH\": 7.2,\n  \"nitrogen\": 100,\n  \"phosphorus\": 25,\n  \"potassium\": 80,\n  \"crop\": \"MAIZE\",\n  \"duration\": \"singleSeason\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/soil-health/improvement-plan",
+              "host": ["{{base_url}}"],
+              "path": ["soil-health", "improvement-plan"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Supported Crops",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/soil-health/crops",
+              "host": ["{{base_url}}"],
+              "path": ["soil-health", "crops"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Cost Calculator",
+      "item": [
+        {
+          "name": "Calculate Farm Economics",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"crop\": \"WHEAT\",\n  \"landArea\": 2.5,\n  \"costs\": {\n    \"seeds\": 5000,\n    \"fertilizer\": 15000,\n    \"labor\": 20000\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/cost-calc/calculate",
+              "host": ["{{base_url}}"],
+              "path": ["cost-calc", "calculate"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Compare Crops",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"crops\": [\"RICE\", \"WHEAT\", \"MAIZE\"],\n  \"landArea\": 2.0\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/cost-calc/compare",
+              "host": ["{{base_url}}"],
+              "path": ["cost-calc", "compare"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Crops Cost Data",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/cost-calc/crops",
+              "host": ["{{base_url}}"],
+              "path": ["cost-calc", "crops"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Specific Crop Cost",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/cost-calc/crop/COTTON",
+              "host": ["{{base_url}}"],
+              "path": ["cost-calc", "crop", "COTTON"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "ROI Analysis",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"crop\": \"SUGARCANE\",\n  \"landArea\": 1.5,\n  \"investment\": 75000\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/cost-calc/roi-analysis",
+              "host": ["{{base_url}}"],
+              "path": ["cost-calc", "roi-analysis"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Government Schemes",
+      "item": [
+        {
+          "name": "Find Matching Schemes",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"crop\": \"WHEAT\",\n  \"landArea\": 1.5,\n  \"income\": 250000,\n  \"location\": \"Punjab\",\n  \"state\": \"PUNJAB\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/schemes/find",
+              "host": ["{{base_url}}"],
+              "path": ["schemes", "find"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Schemes",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/schemes/all",
+              "host": ["{{base_url}}"],
+              "path": ["schemes", "all"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Scheme Details",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/schemes/scheme/SCHEME_001",
+              "host": ["{{base_url}}"],
+              "path": ["schemes", "scheme", "SCHEME_001"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Check Eligibility",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/schemes/eligibility/SCHEME_001?crop=WHEAT&landArea=1.5&income=250000&state=PUNJAB",
+              "host": ["{{base_url}}"],
+              "path": ["schemes", "eligibility", "SCHEME_001"],
+              "query": [
+                {
+                  "key": "crop",
+                  "value": "WHEAT"
+                },
+                {
+                  "key": "landArea",
+                  "value": "1.5"
+                },
+                {
+                  "key": "income",
+                  "value": "250000"
+                },
+                {
+                  "key": "state",
+                  "value": "PUNJAB"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Schemes by Crop",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/schemes/by-crop/RICE",
+              "host": ["{{base_url}}"],
+              "path": ["schemes", "by-crop", "RICE"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Schemes by State",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/schemes/by-state/PUNJAB",
+              "host": ["{{base_url}}"],
+              "path": ["schemes", "by-state", "PUNJAB"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Warehouse Management",
+      "item": [
+        {
+          "name": "Search Warehouses",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"latitude\": 31.5497,\n  \"longitude\": 74.3436,\n  \"capacity\": 1000,\n  \"maxDistance\": 50\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/warehouse/search",
+              "host": ["{{base_url}}"],
+              "path": ["warehouse", "search"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Book Warehouse",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"warehouseId\": \"WAREHOUSE_001\",\n  \"cropType\": \"WHEAT\",\n  \"quantity\": 500,\n  \"duration\": \"monthly\",\n  \"farmerId\": \"FARMER_12345\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/warehouse/book",
+              "host": ["{{base_url}}"],
+              "path": ["warehouse", "book"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Withdraw from Warehouse",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bookingId\": \"BOOKING_001\",\n  \"quantity\": 100,\n  \"date\": \"2026-05-09\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/warehouse/withdraw",
+              "host": ["{{base_url}}"],
+              "path": ["warehouse", "withdraw"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Warehouses",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/warehouse/all",
+              "host": ["{{base_url}}"],
+              "path": ["warehouse", "all"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Warehouse Details",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/warehouse/WAREHOUSE_001",
+              "host": ["{{base_url}}"],
+              "path": ["warehouse", "WAREHOUSE_001"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Check Availability",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/warehouse/WAREHOUSE_001/availability",
+              "host": ["{{base_url}}"],
+              "path": ["warehouse", "WAREHOUSE_001", "availability"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Pest Detection",
+      "item": [
+        {
+          "name": "Identify Pest",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"imageUrl\": \"https://example.com/pest.jpg\",\n  \"description\": \"Small brown insects on crop leaves\",\n  \"cropType\": \"WHEAT\",\n  \"location\": \"Punjab\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/pest-detection/identify",
+              "host": ["{{base_url}}"],
+              "path": ["pest-detection", "identify"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Pest Details",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/pest-detection/pest/PEST_001",
+              "host": ["{{base_url}}"],
+              "path": ["pest-detection", "pest", "PEST_001"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Treatment Recommendations",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/pest-detection/pest/PEST_001/treatment?organic=true",
+              "host": ["{{base_url}}"],
+              "path": ["pest-detection", "pest", "PEST_001", "treatment"],
+              "query": [
+                {
+                  "key": "organic",
+                  "value": "true"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Common Pests for Crop",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/pest-detection/crop/RICE/common-pests",
+              "host": ["{{base_url}}"],
+              "path": ["pest-detection", "crop", "RICE", "common-pests"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Risk Assessment",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/pest-detection/risk-assessment?cropType=WHEAT&temperature=25&humidity=65&rainfall=50&season=SUMMER",
+              "host": ["{{base_url}}"],
+              "path": ["pest-detection", "risk-assessment"],
+              "query": [
+                {
+                  "key": "cropType",
+                  "value": "WHEAT"
+                },
+                {
+                  "key": "temperature",
+                  "value": "25"
+                },
+                {
+                  "key": "humidity",
+                  "value": "65"
+                },
+                {
+                  "key": "rainfall",
+                  "value": "50"
+                },
+                {
+                  "key": "season",
+                  "value": "SUMMER"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Pests",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/pest-detection/all",
+              "host": ["{{base_url}}"],
+              "path": ["pest-detection", "all"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Search Pests",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/pest-detection/search?query=aphid",
+              "host": ["{{base_url}}"],
+              "path": ["pest-detection", "search"],
+              "query": [
+                {
+                  "key": "query",
+                  "value": "aphid"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:5000/api/v1",
+      "type": "string"
+    }
+  ]
+}

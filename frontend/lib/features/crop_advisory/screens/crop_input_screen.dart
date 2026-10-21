@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 import '../models/soil_data.dart';
 import '../providers/crop_advisory_provider.dart';
 import '../widgets/weather_card.dart';
-import 'crop_recommendation_screen.dart';
 
 class CropInputScreen extends ConsumerWidget {
   const CropInputScreen({super.key});

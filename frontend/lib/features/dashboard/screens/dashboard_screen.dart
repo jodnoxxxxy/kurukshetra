@@ -14,6 +14,8 @@ import 'package:kurukshetra/features/home/providers/crop_provider.dart';
 import 'package:kurukshetra/features/ai/soil/screens/soil_analysis_screen.dart';
 import 'package:kurukshetra/features/ai/pest/screens/pest_detection_screen.dart';
 import 'package:kurukshetra/features/home/screens/add_crop_screen.dart';
+import 'package:kurukshetra/features/integration/providers/farm_data_provider.dart';
+
 
 class FarmerDashboardScreen extends ConsumerStatefulWidget {
   const FarmerDashboardScreen({super.key});
@@ -38,7 +40,7 @@ class _FarmerDashboardScreenState extends ConsumerState<FarmerDashboardScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                 _buildStatsRow(context, state, l10n),
+                 _buildStatsRow(context, state, l10n, ref),
                 const SizedBox(height: 32),
                 SectionHeader(
                   title: 'Smart Farming',
@@ -193,7 +195,8 @@ class _FarmerDashboardScreenState extends ConsumerState<FarmerDashboardScreen> {
     );
   }
 
-  Widget _buildStatsRow(BuildContext context, FarmerDashboardState state, AppLocalizations l10n) {
+  Widget _buildStatsRow(BuildContext context, FarmerDashboardState state, AppLocalizations l10n, WidgetRef ref) {
+    final farmData = ref.watch(farmDataProvider);
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       physics: const BouncingScrollPhysics(),
@@ -211,7 +214,7 @@ class _FarmerDashboardScreenState extends ConsumerState<FarmerDashboardScreen> {
           _buildCompactStat(
             icon: Icons.account_balance_wallet_rounded,
             color: Colors.orange,
-            value: '₹${(state.totalInvestment / 1000).toStringAsFixed(1)}k',
+            value: '₹${(farmData.totalCost / 1000).toStringAsFixed(1)}k',
             label: 'Investment',
           ),
           const SizedBox(width: 12),
@@ -219,7 +222,7 @@ class _FarmerDashboardScreenState extends ConsumerState<FarmerDashboardScreen> {
           _buildCompactStat(
             icon: Icons.trending_up_rounded,
             color: Colors.blue,
-            value: '₹${(state.expectedProfit / 1000).toStringAsFixed(1)}k',
+            value: '₹${(farmData.netProfit / 1000).toStringAsFixed(1)}k',
             label: 'Est. Profit',
           ),
         ],

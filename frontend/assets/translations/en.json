@@ -1,0 +1,11 @@
+{
+  "app_title": "Kurukshetra",
+  "start_farming": "START FARMING NOW",
+  "today_tasks": "Today's Tasks",
+  "ai_recommendation": "AI Crop Recommendation",
+  "notification_water_title": "Watering Time!",
+  "notification_water_body": "It's time to water your crop.",
+  "view_tasks": "View Tasks",
+  "no_tasks": "Great job! No tasks pending for today.",
+  "close": "Close"
+}

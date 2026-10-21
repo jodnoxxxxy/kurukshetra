@@ -41,6 +41,8 @@ import 'package:kurukshetra/features/ai/crop/screens/crop_selection_screen.dart'
 import 'package:kurukshetra/features/ai/crop/screens/advisory_timeline_screen.dart';
 import 'package:kurukshetra/features/ai/crop/screens/manual_crop_check_screen.dart';
 import 'package:kurukshetra/features/ai/crop/screens/inspection_results_screen.dart';
+import 'package:kurukshetra/features/calculator/screens/advanced_crop_calculator_screen.dart';
+
 
 import 'package:kurukshetra/features/sop/screens/sop_crop_selection_screen.dart';
 import 'package:kurukshetra/features/sop/screens/sop_steps_screen.dart';
@@ -52,7 +54,6 @@ import 'package:kurukshetra/features/market_prices/screens/price_trend_screen.da
 import 'package:kurukshetra/features/fertilizer_calculator/screens/fertilizer_input_screen.dart';
 import 'package:kurukshetra/features/fertilizer_calculator/screens/fertilizer_result_screen.dart';
 import 'package:kurukshetra/features/climate_technology/screens/climate_dashboard_screen.dart';
-import 'package:kurukshetra/features/climate_technology/screens/climate_advisory_screen.dart' as old_climate;
 import 'package:kurukshetra/features/climate_advisory/screens/climate_advisory_screen.dart';
 import 'package:kurukshetra/features/climate_technology/screens/climate_detail_screen.dart';
 import 'package:kurukshetra/features/dbt/screens/dbt_screen.dart';
@@ -69,6 +70,9 @@ import 'package:kurukshetra/features/profile/screens/payment_details_screen.dart
 import 'package:kurukshetra/features/crop_advisory/screens/crop_input_screen.dart';
 import 'package:kurukshetra/features/crop_advisory/screens/crop_recommendation_screen.dart';
 import 'package:kurukshetra/features/crop_advisory/screens/crop_timeline_screen.dart';
+import 'package:kurukshetra/features/calculator/screens/select_crop_screen.dart';
+import 'package:kurukshetra/features/calculator/screens/expense_screen.dart';
+import 'package:kurukshetra/features/calculator/models/calculator_models.dart';
 
 class AppRouter {
   static final router = GoRouter(
@@ -77,6 +81,25 @@ class AppRouter {
       GoRoute(
         path: '/',
         builder: (context, state) => const MainNavigationScreen(),
+      ),
+      GoRoute(
+        path: '/calculator',
+        builder: (context, state) => const AdvancedCropCalculatorScreen(),
+      ),
+      GoRoute(
+        path: '/calculator/select-crop',
+        builder: (context, state) => const SelectCropScreen(),
+      ),
+      GoRoute(
+        path: '/calculator/expenses',
+        builder: (context, state) {
+          final crop = state.extra as CalcCrop;
+          return ExpenseScreen(crop: crop);
+        },
+      ),
+      GoRoute(
+        path: '/advanced-calculator',
+        builder: (context, state) => const AdvancedCropCalculatorScreen(),
       ),
       GoRoute(
         path: '/splash',

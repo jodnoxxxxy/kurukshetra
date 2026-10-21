@@ -1,0 +1,66 @@
+{
+  "users": {
+    "user_id_123": {
+      "name": "Ramesh",
+      "phone": "+919876543210",
+      "role": "FARMER",
+      "location": {
+        "district": "Pune",
+        "taluka": "Haveli",
+        "village": "Wagholi",
+        "latitude": 18.5793,
+        "longitude": 73.9804
+      },
+      "createdAt": "2026-04-16T10:00:00Z"
+    }
+  },
+  "user_crops": {
+    "crop_id_456": {
+      "userId": "user_id_123",
+      "cropName": "Wheat",
+      "variety": "Lokwan",
+      "areaAcres": 2.5,
+      "sowingDate": "2026-04-01T00:00:00Z",
+      "status": "ACTIVE",
+      "soilType": "Black Cotton"
+    }
+  },
+  "crop_advisories": {
+    "template_wheat": {
+      "cropName": "Wheat",
+      "description": "High-yield wheat farming practices.",
+      "timeline": [
+        {
+          "stage": "Sowing",
+          "startDay": 0,
+          "endDay": 5,
+          "description": "Seed treatment and sowing."
+        },
+        {
+          "stage": "Seedling",
+          "startDay": 6,
+          "endDay": 21,
+          "description": "First irrigation and early growth observation."
+        }
+      ]
+    }
+  },
+  "crop_tasks": {
+    "task_id_789": {
+      "userCropId": "crop_id_456",
+      "dayFromSowing": 15,
+      "priority": "HIGH",
+      "title": "Apply First Dose of Urea",
+      "description": "Apply 25kg Urea per acre.",
+      "isCompleted": false
+    }
+  },
+  "chat_messages": {
+    "msg_123": {
+      "senderId": "user_id_123",
+      "receiverId": "ai",
+      "message": "When should I water the wheat?",
+      "timestamp": "2026-04-16T12:00:00Z"
+    }
+  }
+}

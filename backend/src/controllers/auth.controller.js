@@ -4,25 +4,24 @@ class AuthController {
   // POST /api/auth/register
   async register(req, res) {
     try {
-      const { email, password, phone, firstName, lastName, role } = req.body;
+      const { name, phone, password, location } = req.body;
 
       // Validation
-      if (!email || !password) {
+      if (!phone || !password || !name) {
         return res.status(400).json({
           success: false,
-          message: 'Email and password are required'
+          message: 'Phone, password, and name are required'
         });
       }
 
       const user = await userService.register({
-        email,
+        name,
         password,
         phone,
-        firstName,
-        lastName,
-        role
+        location,
+        role: 'FARMER'
       });
-      console.log('✅ User registered successfully:', user.email);
+      console.log('✅ User registered successfully:', user.phone);
 
       res.status(201).json({
         success: true,
@@ -30,6 +29,7 @@ class AuthController {
         data: user
       });
     } catch (error) {
+      // Handle "User already exists" nicely
       res.status(400).json({
         success: false,
         message: error.message
@@ -40,17 +40,17 @@ class AuthController {
   // POST /api/auth/login
   async login(req, res) {
     try {
-      const { email, password } = req.body;
+      const { phone, password } = req.body;
 
       // Validation
-      if (!email || !password) {
+      if (!phone || !password) {
         return res.status(400).json({
           success: false,
-          message: 'Email and password are required'
+          message: 'Phone and password are required'
         });
       }
 
-      const { user, token } = await userService.login(email, password);
+      const { user, token } = await userService.login(phone, password);
 
       res.status(200).json({
         success: true,

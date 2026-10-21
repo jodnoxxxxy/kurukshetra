@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { authenticate } = require('../middleware/auth');
 const { prisma } = require('../config/database');
+const chatService = require('../services/chat.service');
 
 // GET /api/v1/chat/history
 router.get('/history', authenticate, async (req, res) => {
@@ -60,25 +61,45 @@ router.get('/sessions', authenticate, async (req, res) => {
 router.post('/message', authenticate, async (req, res) => {
   try {
     const { messageText, sessionId, messageType = 'text' } = req.body;
+    const currentSessionId = sessionId || `session_${Date.now()}`;
 
-    // Save user message
+    // 1. Save user message to database
     const userMessage = await prisma.chatMessage.create({
       data: {
         farmerId: req.user.id,
-        sessionId: sessionId || `session_${Date.now()}`,
+        sessionId: currentSessionId,
         messageText,
         isFromUser: true,
         messageType,
       },
     });
 
-    // TODO: Integrate with AI service for response
-    // For now, return a simple acknowledgment
+    // 2. Fetch recent chat history for context
+    const history = await prisma.chatMessage.findMany({
+      where: { sessionId: currentSessionId, farmerId: req.user.id },
+      orderBy: { createdAt: 'asc' },
+      take: 10,
+    });
+
+    // 3. Generate powerful AI response using the ChatService
+    const aiResponseText = await chatService.generateResponse(history, messageText);
+
+    // 4. Save AI response to database
+    const assistantMessage = await prisma.chatMessage.create({
+      data: {
+        farmerId: req.user.id,
+        sessionId: currentSessionId,
+        messageText: aiResponseText,
+        isFromUser: false,
+        messageType: 'text',
+      },
+    });
+
     res.status(201).json({
       status: 'success',
       data: { 
         message: userMessage,
-        aiResponse: 'AI service integration pending',
+        aiResponse: assistantMessage,
       },
     });
   } catch (error) {
